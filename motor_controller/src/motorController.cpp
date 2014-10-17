@@ -1,4 +1,4 @@
-#include "motor_controller.hpp"
+#include "motorController.hpp"
 
 /**
  * Compute the set point required for the given wheel for the requested linear
@@ -101,10 +101,13 @@ void MotorController::runNode(int argc, char* argv[]) {
 	loopRate.sleep();
     }
 }
+
+MotorController::MotorController(int argc, char *argv[]){
+    runNode(argc, argv);
+}
   
 
 int main(int argc, char *argv[]) 
 {
-    MotorController motorControl;
-    motorControl.runNode(argc, argv);
+    MotorController motorControl(argc, argv);
 }

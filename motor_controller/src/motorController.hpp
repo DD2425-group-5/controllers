@@ -7,14 +7,14 @@
 
 class MotorController {
 public:
+  MotorController(int argc, char *argv[]);
+
+private:
   enum Wheel {
     LEFT_WHEEL,
     RIGHT_WHEEL,
   };
   
-  void runNode(int argc, char *argv[]);
-
-private:
   ros::Publisher pub_PWM;
   ros::Subscriber sub_enc;
   ros::Subscriber sub_twist;
@@ -37,4 +37,5 @@ private:
   void encoderCallback(const ras_arduino_msgs::Encoders::ConstPtr& msg);
   void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
   void initParams(ros::NodeHandle handle);
+  void runNode(int argc, char *argv[]);
 };
