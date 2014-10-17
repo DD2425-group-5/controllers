@@ -36,6 +36,6 @@ private:
   float computeAngularSetPoint(float linearVel, float angularVel, Wheel wheel);
   void encoderCallback(const ras_arduino_msgs::Encoders::ConstPtr& msg);
   void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
-  void initParams(ros::NodeHandle handle);
-  void runNode(int argc, char *argv[]);
+  void runNode(ros::NodeHandle handle);
+  ros::NodeHandle nodeSetup(int argc, char* argv[]);
 };
