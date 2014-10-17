@@ -1,5 +1,5 @@
 <package>
-  <name>ras_lab1_motor_controller</name>
+  <name>motor_controller</name>
   <version>1.2.4</version>
   <description>
     This is a package

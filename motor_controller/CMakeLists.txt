@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ras_lab1_motor_controller)
+project(motor_controller)
 
 # Get the information about this package's buildtime dependencies
 find_package(catkin REQUIRED COMPONENTS
