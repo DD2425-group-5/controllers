@@ -11,12 +11,10 @@ catkin_package(
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${orocos_kdl_INCLUDE_DIRS}
 )
 
 
 
 add_executable(motor_controller2 src/motorController2.cpp)
 target_link_libraries(motor_controller2 ${catkin_LIBRARIES})
-
+add_dependencies(motor_controller2 ${catkin_EXPORTED_TARGETS})
