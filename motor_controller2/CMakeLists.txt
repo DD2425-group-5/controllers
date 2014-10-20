@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(motor_controller2)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs kdl_conversions)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs kdl_conversions ras_arduino_msgs)
 find_package(Boost REQUIRED COMPONENTS random)
 find_package(orocos_kdl REQUIRED)
 
