@@ -4,9 +4,21 @@
 blobfollower::blobfollower(int argc, char *argv[]) {
     ros::init(argc, argv, "follower");	//name of node
     ros::NodeHandle handle;			//the handle
+    
+    std::string blob_sub_topic;
+    if (!handle.getParam("/topic_list/vision_topics/pixel_detect/published/blob", blob_sub_topic)){
+    	ROS_ERROR("/topic_list/vision_topics/pixel_detect/published/blob is not defined in node %s!", ros::this_node::getName().c_str());
+    	std::exit(1);
+    }
 
-    pub_motor = handle.advertise<geometry_msgs::Twist>("/motor_controller/Twist", 1000);
-    sub_rgbd = handle.subscribe("/vision/closest_blob", 1000, &blobfollower::rgbdCallback, this);
+    std::string twist_pub_topic;
+    if (!handle.getParam("/topic_list/controller_topics/motor2/subscribed/twist_topic", twist_pub_topic)){
+	ROS_ERROR("/topic_list/controller_topics/motor2/subscribed/twist_topic is not defined!");
+	std::exit(1);
+    }
+
+    pub_motor = handle.advertise<geometry_msgs::Twist>(twist_pub_topic, 1000);
+    sub_rgbd = handle.subscribe(blob_sub_topic, 1000, &blobfollower::rgbdCallback, this);
 
     halfwidth = 640/2;
     desired_depth = 500;
@@ -47,7 +59,7 @@ void blobfollower::update() {
 
 int main(int argc, char *argv[]) 
 {
-	blobfollower blob(argc,argv);
+    blobfollower blob(argc,argv);
     ros::Rate loop_rate(10);
     while(ros::ok()) {
         blob.update();
@@ -55,5 +67,5 @@ int main(int argc, char *argv[])
         loop_rate.sleep();
     }
 
-	return 0;
+    return 0;
 }
