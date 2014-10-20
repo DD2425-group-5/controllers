@@ -109,6 +109,7 @@ catkin_package(
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  blobdetection
 )
 
 
