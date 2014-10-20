@@ -1,0 +1,24 @@
+<launch>
+  
+   <node name="motor_controller2" pkg="motor_controller2" type="motor_controller2" output="screen"> 
+ 
+
+<!--  Twist x=0.8 
+  <param name="Gp_R" value="6" />   
+  <param name="Gp_L" value="6" />
+  <param name="Gi_R" value="0" />
+  <param name="Gi_L" value="0" />
+-->
+
+<!--  new! Twist x=0.8 "holy shit"  -->
+  <param name="Gp_R" value="10" />   
+  <param name="Gp_L" value="10.5" />
+  <param name="Gi_R" value="0.9" />
+  <param name="Gi_L" value="0.9" />
+  <param name="Gd_R" value="0.1" />   
+  <param name="Gd_L" value="0.1" />
+  <param name="Gc_R" value="0" />
+  <param name="Gc_L" value="0" />
+
+  </node>
+</launch>
