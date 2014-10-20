@@ -49,7 +49,8 @@
 
   <build_depend>orocos_kdl</build_depend>
   <build_depend>kdl_conversions</build_depend>
-
+  <build_depend>ras_arduino_msgs</build_depend>
+  <build_depend>ras_arduino_msgs</build_depend>
 
   <run_depend>orocos_kdl</run_depend>
   <run_depend>kdl_conversions</run_depend>
