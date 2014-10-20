@@ -1,7 +1,5 @@
 //Modified motorController
 
-#include "motorController.hpp"
-
 #include "ros/ros.h"
 #include "std_msgs/Int32.h"
 #include "ras_arduino_msgs/PWM.h"
