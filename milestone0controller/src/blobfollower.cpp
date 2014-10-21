@@ -5,7 +5,7 @@ blobfollower::blobfollower(int argc, char *argv[]) {
     ros::init(argc, argv, "follower");	//name of node
     ros::NodeHandle handle;			//the handle
 
-    pub_motor = handle.advertise<geometry_msgs::Twist>("/motor_controller/Twist", 1000);
+    pub_motor = handle.advertise<geometry_msgs::Twist>("/motor_controller/twist", 1000);
     sub_rgbd = handle.subscribe("/vision/closest_blob", 1000, &blobfollower::rgbdCallback, this);
 
     halfwidth = 640/2;
