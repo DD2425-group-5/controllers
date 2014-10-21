@@ -49,7 +49,7 @@ ros::NodeHandle MotorController2::nodeSetup(int argc, char* argv[]){
     chatter_pub = n.advertise<ras_arduino_msgs::PWM>("/arduino/pwm", 1000);
     sub_feedback = n.subscribe("/arduino/encoders", 1000,&MotorController2::feedbackCallback, this);
     sub_setpoint = n.subscribe("/motor_controller/twist", 1000,&MotorController2::setpointCallback, this);
- double Gp_L = 0.0;
+    double Gp_L = 0.0;
     double Gp_R = 0.0;
     double Gi_L = 0.0;
     double Gi_R = 0.0;
@@ -124,36 +124,88 @@ ros::NodeHandle MotorController2::nodeSetup(int argc, char* argv[]){
 	    control_i_OLD_L = control_i_L;
 	    control_OLD_L_preSat=control_L_preSat;
 
-	    //  CHEAT###
-	    control_L_preSat+=31;
-	    control_R_preSat+=30;
-	    // /CHEAT
+	   
+
+ //  CHEAT###
+
+		if (setpoint_wR <0.01){
+		 control_R_preSat-=30;
+		}
+		else {
+		control_R_preSat+=30;
+		}
+
+
+		if (setpoint_wL <0.01){
+		 control_L_preSat-=31;
+		}
+		else {
+		control_L_preSat+=31;
+		}
+
+// /CHEAT
 
 
 
 
 	    //APPLY SATURATION
 	    //RIGHT WHEEL
-	    if (control_R_preSat < satMIN){
+	   if (control_R_preSat < satMIN && setpoint_wR>0){
 		control.PWM1 = satMIN;
 	    }
-	    else if (control_R_preSat > satMAX){
+	    else if (control_R_preSat > satMAX && setpoint_wR>0){
 		control.PWM1 = satMAX;
 	    }
 	    else{
 		control.PWM1 = control_R_preSat;
 	    }
 
+
+	 if (control_R_preSat > (-1)*satMIN && setpoint_wR<0){
+		control.PWM1 = (-1)*satMIN;
+	    }
+	    else if (control_R_preSat < (-1)*satMAX && setpoint_wR<0){
+		control.PWM1 = (-1)*satMAX;
+	    }
+	    else{
+		control.PWM1 = control_R_preSat;
+	    }
+
+		if (setpoint_wR <0.01 && setpoint_wR >-0.01){
+		control.PWM1 = 0;
+		}
+
+
+
+
 	    //LEFT WHEEL
-	    if (control_L_preSat < satMIN){
+	    if (control_L_preSat < satMIN && setpoint_wL>0){
 		control.PWM2 = satMIN;
 	    }
-	    else if (control_L_preSat > satMAX){
+	    else if (control_L_preSat > satMAX  && setpoint_wL>0){
 		control.PWM2 = satMAX;
 	    }
 	    else{
 		control.PWM2 = control_L_preSat;
 	    }
+
+
+	if (control_L_preSat >(-1)*(satMIN) && setpoint_wL<0){
+		control.PWM2 = (-1)*(satMIN);
+	    }
+	    else if (control_L_preSat <(-1)*(satMAX) && setpoint_wL<0){
+		control.PWM2 = (-1)*(satMAX);
+	    }
+	    else{
+		control.PWM2 = control_L_preSat;
+	    }
+
+	if (setpoint_wL <0.01 && setpoint_wL >-0.01){
+			control.PWM2 = 0;
+			}
+
+
+
 
 	    control_OLD_R_postSat = control.PWM1;
 	    control_OLD_L_postSat = control.PWM2;
