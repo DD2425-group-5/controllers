@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>milestone0controller</name>
+  <name>blob_follow_controller</name>
   <version>0.0.0</version>
   <description>The milestone0controller package</description>
 
@@ -29,12 +29,17 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>roscpp</buildtool_depend>
+  <build_depend>roscpp</build_depend>
   <run_depend>roscpp</run_depend>
-  <buildtool_depend>geometry_msgs</buildtool_depend>
+  <build_depend>std_msgs</build_depend>
+  <run_depend>std_msgs</run_depend>
+  <build_depend>geometry_msgs</build_depend>
   <run_depend>geometry_msgs</run_depend>
-  <buildtool_depend>blobdetection</buildtool_depend>
+  <build_depend>blobdetection</build_depend>
   <run_depend>blobdetection</run_depend>  
+  <build_depend>rosutil</build_depend>
+  <run_depend>rosutil</run_depend>  
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

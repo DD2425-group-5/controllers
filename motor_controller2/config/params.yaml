@@ -1,0 +1,14 @@
+controller2: {
+  Gp_R: 10,
+  Gp_L: 10.5,
+  Gi_R: 0.9,
+  Gi_L: 0.9,
+  Gd_R: 0.1,
+  Gd_L: 0.1,
+  Gc_R: 0,
+  Gc_L: 0,
+  control_freq: 10,
+  control_time: 0.1,
+  satMin: 40,
+  satMax: 150
+}
