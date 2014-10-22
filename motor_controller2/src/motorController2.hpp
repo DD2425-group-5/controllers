@@ -4,9 +4,9 @@
 #include "ras_arduino_msgs/Encoders.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Vector3.h"
+#include <rosutil.hpp>
 #include <math.h>
 #include <sstream>
-#include <typeinfo>
 
 class MotorController2 {
 public:
