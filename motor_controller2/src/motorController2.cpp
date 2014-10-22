@@ -1,8 +1,39 @@
 #include "motorController2.hpp"
 
 MotorController2::MotorController2(int argc, char *argv[]){
-    ros::NodeHandle handle = nodeSetup(argc, argv);
-    runNode(handle);
+    ros::init(argc, argv, "motor_controller2");
+    ros::NodeHandle n;
+
+    
+    std::string pwm_pub_topic;
+    ROSUtil::getParam(n, "/topic_list/robot_topics/subscribed/pwm_topic", pwm_pub_topic);
+    std::string encoder_sub_topic;
+    ROSUtil::getParam(n, "/topic_list/robot_topics/published/encoder_topic", encoder_sub_topic);
+    std::string twist_sub_topic;
+    ROSUtil::getParam(n, "/topic_list/controller_topics/motor2/subscribed/twist_topic", twist_sub_topic);
+    
+    
+    chatter_pub = n.advertise<ras_arduino_msgs::PWM>(pwm_pub_topic, 1000);
+    sub_feedback = n.subscribe(encoder_sub_topic, 1000,&MotorController2::feedbackCallback, this);
+    sub_setpoint = n.subscribe(twist_sub_topic, 1000,&MotorController2::setpointCallback, this);
+
+    ROSUtil::getParam(n, "/controller2/Gp_L", Gp_L);
+    ROSUtil::getParam(n, "/controller2/Gp_R", Gp_R);
+    ROSUtil::getParam(n, "/controller2/Gi_L", Gi_L);
+    ROSUtil::getParam(n, "/controller2/Gi_R", Gi_R);
+    ROSUtil::getParam(n, "/controller2/Gd_L", Gd_L);
+    ROSUtil::getParam(n, "/controller2/Gd_R", Gd_R);
+    ROSUtil::getParam(n, "/controller2/Gc_L", Gc_L);
+    ROSUtil::getParam(n, "/controller2/Gc_R", Gc_R);
+    ROSUtil::getParam(n, "/controller2/control_freq", control_frequency);
+    ROSUtil::getParam(n, "/controller2/control_time", control_time);
+    ROSUtil::getParam(n, "/robot_info/ticks_per_rev", ticks_per_rev);
+    ROSUtil::getParam(n, "/robot_info/wheel_baseline", b);
+    ROSUtil::getParam(n, "/robot_info/wheel_radius", r);
+    ROSUtil::getParam(n, "/controller2/satMin", satMIN);
+    ROSUtil::getParam(n, "/controller2/satMax", satMAX);
+
+    runNode();
 }
 
 void MotorController2::feedbackCallback( ras_arduino_msgs::Encoders feedback)
@@ -35,7 +66,7 @@ void MotorController2::setpointCallback( geometry_msgs::Twist setpoint)
     setpoint_wR=(v+(b/2)*w)/r;
 }
 
-void MotorController2::runNode(ros::NodeHandle handle){
+void MotorController2::runNode(){
     ROS_INFO("cfrq: %f, ctm: %f, satmin: %f, satmax: %f", control_frequency, control_time, satMIN, satMAX);
     
     float err_L = 0.0;
@@ -167,43 +198,6 @@ void MotorController2::runNode(ros::NodeHandle handle){
 	loop_rate.sleep();
 	//return 0; //debug
     }
-}
-
-
-ros::NodeHandle MotorController2::nodeSetup(int argc, char* argv[]){
-    ros::init(argc, argv, "motor_controller2");
-    ros::NodeHandle n;
-
-    
-    std::string pwm_pub_topic;
-    ROSUtil::getParam(n, "/topic_list/robot_topics/subscribed/pwm_topic", pwm_pub_topic);
-    std::string encoder_sub_topic;
-    ROSUtil::getParam(n, "/topic_list/robot_topics/published/encoder_topic", encoder_sub_topic);
-    std::string twist_sub_topic;
-    ROSUtil::getParam(n, "/topic_list/controller_topics/motor2/subscribed/twist_topic", twist_sub_topic);
-    
-    
-    chatter_pub = n.advertise<ras_arduino_msgs::PWM>(pwm_pub_topic, 1000);
-    sub_feedback = n.subscribe(encoder_sub_topic, 1000,&MotorController2::feedbackCallback, this);
-    sub_setpoint = n.subscribe(twist_sub_topic, 1000,&MotorController2::setpointCallback, this);
-
-    ROSUtil::getParam(n, "/controller2/Gp_L", Gp_L);
-    ROSUtil::getParam(n, "/controller2/Gp_R", Gp_R);
-    ROSUtil::getParam(n, "/controller2/Gi_L", Gi_L);
-    ROSUtil::getParam(n, "/controller2/Gi_R", Gi_R);
-    ROSUtil::getParam(n, "/controller2/Gd_L", Gd_L);
-    ROSUtil::getParam(n, "/controller2/Gd_R", Gd_R);
-    ROSUtil::getParam(n, "/controller2/Gc_L", Gc_L);
-    ROSUtil::getParam(n, "/controller2/Gc_R", Gc_R);
-    ROSUtil::getParam(n, "/controller2/control_freq", control_frequency);
-    ROSUtil::getParam(n, "/controller2/control_time", control_time);
-    ROSUtil::getParam(n, "/robot_info/ticks_per_rev", ticks_per_rev);
-    ROSUtil::getParam(n, "/robot_info/wheel_baseline", b);
-    ROSUtil::getParam(n, "/robot_info/wheel_radius", r);
-    ROSUtil::getParam(n, "/controller2/satMin", satMIN);
-    ROSUtil::getParam(n, "/controller2/satMax", satMAX);
-
-    return n;
 }
 
 int main(int argc, char **argv)

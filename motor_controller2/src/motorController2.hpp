@@ -41,6 +41,5 @@ private:
   
     void feedbackCallback( ras_arduino_msgs::Encoders feedback);
     void setpointCallback( geometry_msgs::Twist setpoint);
-    void runNode(ros::NodeHandle handle);
-    ros::NodeHandle nodeSetup(int argc, char* argv[]);
+    void runNode();
 };
