@@ -38,7 +38,6 @@ void MotorController2::setpointCallback( geometry_msgs::Twist setpoint)
 void MotorController2::runNode(ros::NodeHandle handle){
     ROS_INFO("cfrq: %f, ctm: %f, satmin: %f, satmax: %f", control_frequency, control_time, satMIN, satMAX);
     
-    
     float err_L = 0.0;
     float err_R = 0.0;
     float control_p_L = 0.0;
@@ -60,12 +59,9 @@ void MotorController2::runNode(ros::NodeHandle handle){
     float err_OLD_L;
     float err_OLD_R;
 
-
     ros::Rate loop_rate(control_frequency);
 
-
-    while (ros::ok())
-    {
+    while (ros::ok()) {
 	ROS_INFO("Launching with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f", Gp_L, Gi_L, Gd_L, Gp_R, Gi_R, Gd_R);
 	ROS_INFO("Setpoint: Lin: x=%f Ang: z=%f", v, w);
 	ROS_INFO("L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
@@ -75,23 +71,16 @@ void MotorController2::runNode(ros::NodeHandle handle){
 	err_L= setpoint_wL - feedback_wL;
 	err_R= setpoint_wR - feedback_wR;
 
-
-
 	//controller Right wheel (PWM1), INCL Antiwindup
-       
-
 	control_p_R=Gp_R*err_R;
 	control_i_R=control_i_OLD_R + (control_time*Gi_R)*err_R +(Gc_R/Gp_R)* (control_OLD_R_postSat - control_OLD_R_preSat);
 	control_d_R= (Gd_R/control_time)*(err_R-err_OLD_R);
 	control_R_preSat = control_p_R + control_i_R + control_d_R;
 
-    
 	//save values for next iteration
 	err_OLD_R = err_R;
 	control_i_OLD_R = control_i_R;
 	control_OLD_R_preSat = control_R_preSat;
-
-
 
 	//controller Left wheel (PWM2), INCL Antiwindup
 	control_p_L=Gp_L*err_L;
@@ -104,35 +93,67 @@ void MotorController2::runNode(ros::NodeHandle handle){
 	control_OLD_L_preSat=control_L_preSat;
 
 	//  CHEAT###
-	control_L_preSat+=31;
-	control_R_preSat+=30;
-	// /CHEAT
+	if (setpoint_wR <0.01){
+	    control_R_preSat-=30;
+	} else {
+	    control_R_preSat+=30;
+	}
 
 
+	if (setpoint_wL <0.01){
+	    control_L_preSat-=31;
+	} else {
+	    control_L_preSat+=31;
+	}
 
+// /CHEAT
 
 	//APPLY SATURATION
 	//RIGHT WHEEL
-	if (control_R_preSat < satMIN){
+	if (control_R_preSat < satMIN && setpoint_wR>0){
 	    control.PWM1 = satMIN;
-	}
-	else if (control_R_preSat > satMAX){
+	} else if (control_R_preSat > satMAX && setpoint_wR>0){
 	    control.PWM1 = satMAX;
-	}
-	else{
+	} else{
 	    control.PWM1 = control_R_preSat;
 	}
 
+
+	if (control_R_preSat > (-1)*satMIN && setpoint_wR<0){
+	    control.PWM1 = (-1)*satMIN;
+	} else if (control_R_preSat < (-1)*satMAX && setpoint_wR<0){
+	    control.PWM1 = (-1)*satMAX;
+	} else{
+	    control.PWM1 = control_R_preSat;
+	}
+
+	if (setpoint_wR <0.01 && setpoint_wR >-0.01){
+	    control.PWM1 = 0;
+	}
+
+
 	//LEFT WHEEL
-	if (control_L_preSat < satMIN){
+	if (control_L_preSat < satMIN && setpoint_wL>0){
 	    control.PWM2 = satMIN;
-	}
-	else if (control_L_preSat > satMAX){
+	} else if (control_L_preSat > satMAX  && setpoint_wL>0){
 	    control.PWM2 = satMAX;
-	}
-	else{
+	} else{
 	    control.PWM2 = control_L_preSat;
 	}
+
+
+	if (control_L_preSat >(-1)*(satMIN) && setpoint_wL<0){
+	    control.PWM2 = (-1)*(satMIN);
+	} else if (control_L_preSat <(-1)*(satMAX) && setpoint_wL<0){
+	    control.PWM2 = (-1)*(satMAX);
+	} else{
+	    control.PWM2 = control_L_preSat;
+	}
+
+	if (setpoint_wL <0.01 && setpoint_wL >-0.01){
+	    control.PWM2 = 0;
+	}
+
 
 	control_OLD_R_postSat = control.PWM1;
 	control_OLD_L_postSat = control.PWM2;
@@ -146,9 +167,8 @@ void MotorController2::runNode(ros::NodeHandle handle){
 	loop_rate.sleep();
 	//return 0; //debug
     }
-
-
 }
+
 
 ros::NodeHandle MotorController2::nodeSetup(int argc, char* argv[]){
     ros::init(argc, argv, "motor_controller2");
