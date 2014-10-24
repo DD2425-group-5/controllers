@@ -4,7 +4,7 @@
 #include "ras_arduino_msgs/Encoders.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Vector3.h"
-#include <rosutil.hpp>
+#include <rosutil/rosutil.hpp>
 #include <math.h>
 #include <sstream>
 

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include <blobdetection/depth_point.h>
-#include <rosutil.hpp>
+#include <rosutil/rosutil.hpp>
 
 
 class BlobFollower {
