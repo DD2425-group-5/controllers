@@ -6,6 +6,8 @@ public:
 	sensor(int num);
 	double get_distance();
 	int get_value();
+	int get_number();
+	
 private:
 	double distance;
 	int value;

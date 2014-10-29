@@ -9,9 +9,9 @@ public:
 	wallfollower(int argc, char *argv[]);
 	
 private:
-	sensor s1;
+	sensor distance[6];
 	ros::Subscriber sub_sensor;	//sub to get distance values
 	ros::Publisher pub_motor;	//for the motor
 	
-	void sensorCallback(const ras_arduino_msgs::ADConverter::ConstPtr& msg);
+	void sensorCallback(const ras_arduino_msgs::ADConverter msg);
 };
