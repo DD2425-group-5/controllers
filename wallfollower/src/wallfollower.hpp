@@ -13,5 +13,6 @@ private:
 	ros::Subscriber sub_sensor;	//sub to get distance values
 	ros::Publisher pub_motor;	//for the motor
 	
+	void runNode();
 	void sensorCallback(const ras_arduino_msgs::ADConverter msg);
 };
