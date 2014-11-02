@@ -9,7 +9,8 @@ public:
 	wallfollower(int argc, char *argv[]);
 	
 private:
-	sensor distance[6];
+	sensor sensors[6];
+	sensor s1;
 	ros::Subscriber sub_sensor;	//sub to get distance values
 	ros::Publisher pub_motor;	//for the motor
 	
