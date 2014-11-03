@@ -1,17 +1,11 @@
 #include "wallfollower.hpp"
 
 void wallfollower::sensorCallback(const ras_arduino_msgs::ADConverter msg){
-	ROS_INFO("sensor: 1: [%d] 2: [%d]",\
-	msg.ch1,\
-	msg.ch2);
-	//s1.calculateDistance(msg.ch1);
-	/*ROS_INFO("sensor distance: 1: [%f]",\
-	s1.get_distance());*/
 	int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
 	for(int i=0;i<6;i++){
 		sensors[i].calculateDistance(tmp[i]);
 	}
-	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] ",\
+	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
 	sensors[0].get_distance(),\
 	sensors[1].get_distance(),\
 	sensors[2].get_distance(),\
@@ -24,14 +18,15 @@ void wallfollower::runNode(){
 	ros::Rate loop_rate(10);	//10 Hz
 	while (ros::ok())			//main loop of this code
 	{
-		/*Todo add code for following the wall*/
+		/*work in progress*/
 		
 		
 		geometry_msgs::Twist msg;	//for controlling the motor
-		msg.linear.x = 0.0;
-		msg.angular.z = 0.0;
+		msg.linear.x = 0.9;
+		msg.angular.z = 0.01*(sensors[0].get_value() - sensors[2].get_value());
 		pub_motor.publish(msg);		//pub to motor
-		
+ROS_INFO(" msg.angular.z = %f", msg.angular.z);		
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
@@ -55,7 +50,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	sensors[4].calibrate(0,0,0,0,0,0,0);
 	sensors[5].calibrate(0,0,0,0,0,0,0);
 	
-	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor_controller/Twist", 1000);
+	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor2/twist", 1000);
 	sub_sensor = handle.subscribe("/arduino/adc", 1000, &wallfollower::sensorCallback, this);
 	
 	runNode();
