@@ -15,6 +15,9 @@ void sensor::calculateDistance(int val){
 		x2 * std::pow(value, 2) +
 		x1 * value + n;
 	distance = tmp;
+	if(distance>30){
+		distance=30;
+	}
 }
 
 void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,double xx1,double nn){
