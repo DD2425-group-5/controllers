@@ -3,7 +3,8 @@
 MotorController2::MotorController2(int argc, char *argv[]){
     ros::init(argc, argv, "motor_controller2");
     ros::NodeHandle n;
-
+    v = 0.0;
+    w = 0.0;
     
     std::string pwm_pub_topic;
     ROSUtil::getParam(n, "/topic_list/robot_topics/subscribed/pwm_topic", pwm_pub_topic);
@@ -61,9 +62,17 @@ void MotorController2::setpointCallback( geometry_msgs::Twist setpoint)
     //ROS_INFO("Setpoint: Lin.x=Z%f Ang.z=%f",  setpoint.linear.x, setpoint.angular.z);
     //Calculate desired wheelangular velocities from setpoint Twist matrix:
     v = setpoint.linear.x;
+if (v>1){
+ROS_INFO("ATTENTION: v= %f",v);
+v = 0.0;
+  }
     w = setpoint.angular.z;
+if (w>5){
+w = 0.0;
+}
     setpoint_wL=(v-(b/2)*w)/r;
     setpoint_wR=(v+(b/2)*w)/r;
+
 }
 
 void MotorController2::runNode(){
@@ -81,14 +90,14 @@ void MotorController2::runNode(){
     float control_R_preSat = 0.0;
     float control_L_postSat = 0.0;
     float control_R_postSat = 0.0;
-    float control_i_OLD_L;
-    float control_i_OLD_R;
-    float control_OLD_L_preSat;
-    float control_OLD_R_preSat;
-    float control_OLD_L_postSat;
-    float control_OLD_R_postSat;
-    float err_OLD_L;
-    float err_OLD_R;
+    float control_i_OLD_L = 0.0;
+    float control_i_OLD_R = 0.0;
+    float control_OLD_L_preSat = 0.0;
+    float control_OLD_R_preSat = 0.0;
+    float control_OLD_L_postSat = 0.0;
+    float control_OLD_R_postSat = 0.0;
+    float err_OLD_L = 0.0;
+    float err_OLD_R = 0.0;
 
     ros::Rate loop_rate(control_frequency);
 
@@ -116,6 +125,10 @@ void MotorController2::runNode(){
 	//controller Left wheel (PWM2), INCL Antiwindup
 	control_p_L=Gp_L*err_L;
 	control_i_L=control_i_OLD_L + (control_time*Gi_L)*err_L +(Gc_L/Gp_L)* (control_OLD_L_postSat - control_OLD_L_preSat);
+	
+
+ROS_INFO("err_L %f",err_L);
+ROS_INFO("control_i_L %f",control_i_L);
 	control_d_L= (Gd_L/control_time)*(err_L-err_OLD_L);
 	control_L_preSat = control_p_L + control_i_L + control_d_L; //controller output before the saturation
 	//save values for next iteration
@@ -138,19 +151,24 @@ void MotorController2::runNode(){
 	}
 
 // /CHEAT
+ROS_INFO("Control: satMIN: %f, satMAX: %f", satMIN, satMAX);
+ROS_INFO("control_R_preSat %f",control_R_preSat);
+ROS_INFO("setpoint_wR %f",setpoint_wR);
+
 
 	//APPLY SATURATION
 	//RIGHT WHEEL
 	if (control_R_preSat < satMIN && setpoint_wR>0){
 	    control.PWM1 = satMIN;
 	} else if (control_R_preSat > satMAX && setpoint_wR>0){
+
 	    control.PWM1 = satMAX;
-	} else{
+	}/* else{
 	    control.PWM1 = control_R_preSat;
-	}
+	}*/
 
 
-	if (control_R_preSat > (-1)*satMIN && setpoint_wR<0){
+	else if (control_R_preSat > (-1)*satMIN && setpoint_wR<0){
 	    control.PWM1 = (-1)*satMIN;
 	} else if (control_R_preSat < (-1)*satMAX && setpoint_wR<0){
 	    control.PWM1 = (-1)*satMAX;
@@ -168,12 +186,12 @@ void MotorController2::runNode(){
 	    control.PWM2 = satMIN;
 	} else if (control_L_preSat > satMAX  && setpoint_wL>0){
 	    control.PWM2 = satMAX;
-	} else{
+	}/* else{
 	    control.PWM2 = control_L_preSat;
-	}
+	}*/
 
 
-	if (control_L_preSat >(-1)*(satMIN) && setpoint_wL<0){
+	else if (control_L_preSat >(-1)*(satMIN) && setpoint_wL<0){
 	    control.PWM2 = (-1)*(satMIN);
 	} else if (control_L_preSat <(-1)*(satMAX) && setpoint_wL<0){
 	    control.PWM2 = (-1)*(satMAX);

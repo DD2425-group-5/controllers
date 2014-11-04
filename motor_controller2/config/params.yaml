@@ -5,10 +5,10 @@ controller2: {
   Gi_L: 0.9,
   Gd_R: 0.1,
   Gd_L: 0.1,
-  Gc_R: 0,
-  Gc_L: 0,
+  Gc_R: 0.0,
+  Gc_L: 0.0,
   control_freq: 10,
   control_time: 0.1,
-  satMin: 40,
-  satMax: 150
+  satMin: 40.0,
+  satMax: 150.0
 }
