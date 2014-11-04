@@ -1,13 +1,14 @@
 #include "sensor.hpp"
 
-sensor::sensor(int num,double x6,double x5,double x4,double x3,double x2,double x1,double n) : 
-	x1(x1),x2(x2),x3(x3),x4(x4),x5(x5),x6(x6),n(n){
+sensor::sensor(int num,double x6,double x5,double x4,double x3,double x2,double x1,double n, bool lrange) : 
+	x1(x1),x2(x2),x3(x3),x4(x4),x5(x5),x6(x6),n(n),lrange(lrange){
 	number=num;
 }
 
 void sensor::calculateDistance(int val){
 	value= val;
 	double tmp=0;
+	
 	tmp=x6 * std::pow(value, 6) +
 		x5 * std::pow(value, 5) +
 		x4 * std::pow(value, 4) +
@@ -15,12 +16,12 @@ void sensor::calculateDistance(int val){
 		x2 * std::pow(value, 2) +
 		x1 * value + n;
 	distance = tmp;
-	if(distance>30){
+	if(distance>30 && !lrange){
 		distance=30;
 	}
 }
 
-void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,double xx1,double nn){
+void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,double xx1,double nn,bool llrange){
 	x1=xx1;
 	x2=xx2;
 	x3=xx3;
@@ -28,6 +29,7 @@ void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,do
 	x5=xx5;
 	x6=xx6;
 	n=nn;
+	lrange=llrange;
 }
 
 int sensor::get_number(){
