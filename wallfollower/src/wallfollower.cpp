@@ -22,8 +22,8 @@ void wallfollower::runNode(){
 		
 		
 		geometry_msgs::Twist msg;	//for controlling the motor
-		msg.linear.x = 0.9;
-		msg.angular.z = 0.01*(sensors[0].get_value() - sensors[2].get_value());
+		msg.linear.x = 0.4;
+		msg.angular.z = -0.03*(sensors[0].get_value() - sensors[2].get_value());
 		pub_motor.publish(msg);		//pub to motor
 ROS_INFO(" msg.angular.z = %f", msg.angular.z);		
 
@@ -47,8 +47,8 @@ wallfollower::wallfollower(int argc, char *argv[]){
 		0.007948,-1.204,94.02);
 	sensors[3].calibrate(0,-1.043*std::pow(10, -11),1.973*std::pow(10, -8),
 		-1.461*std::pow(10, -5),0.00536,-1.014,91.89);
-	sensors[4].calibrate(0,0,0,0,0,0,0);
-	sensors[5].calibrate(0,0,0,0,0,0,0);
+	sensors[4].calibrate(0,-1.075*std::pow(10, -6),0.0002998,-0.03326,1.888,-58.2,920);
+	sensors[5].calibrate(-1.864*std::pow(10, -8),4.985*std::pow(10, -6),-0.0004601,0.01286,0.4919,-38.29,811.7);
 	
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor2/twist", 1000);
 	sub_sensor = handle.subscribe("/arduino/adc", 1000, &wallfollower::sensorCallback, this);
