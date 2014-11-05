@@ -16,12 +16,57 @@ void sensor::calculateDistance(int val){
 		x2 * std::pow(value, 2) +
 		x1 * value + n;
 	distance = tmp;
-	if(distance>30 && !lrange){
-		distance=30;
+	/*if(distance>maxRange){
+		distance=-1;
+	}
+	for(int i=0;i<29;i++){
+		record[i]=record[i+1];
+		if(n==116.8){
+			ROS_INFO("%d: %f",i,record[i]);
+		}
+	}
+	record[29]=distance;
+	if(n==116.8){
+		ROS_INFO("%d: %f",19,record[19]);
+	}*/
+	// TEMP SOULUTION REALY UGLY
+	if(value<110){
+		value=-1;
+	}
+	for(int i=0;i<29;i++){
+		record[i]=record[i+1];
+		/*if(n==116.8){
+			ROS_INFO("%d: %f",i,record[i]);
+		}*/
+	}
+	record[29]=value;
+}
+
+int sensor::hasContact(){
+	if(record[29]>0 && record[28]>0 /*&& record[17]>0 */){
+		return 1;
+	}
+	else{
+		return 0;
 	}
 }
 
-void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,double xx1,double nn,bool llrange){
+int sensor::hasBump(){
+	int count=0;
+	for(int i=0;i<30;i++){
+		if(record[i]>0){
+			count++;
+		}
+	}
+	if(count>5){
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
+
+void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,double xx1,double nn,int max,int min){
 	x1=xx1;
 	x2=xx2;
 	x3=xx3;
@@ -29,7 +74,8 @@ void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,do
 	x5=xx5;
 	x6=xx6;
 	n=nn;
-	lrange=llrange;
+	maxRange=max;
+	minRange=min;
 }
 
 int sensor::get_number(){
