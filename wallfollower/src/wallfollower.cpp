@@ -58,7 +58,7 @@ void wallfollower::runNode(){
 		geometry_msgs::Twist msg;	//for controlling the motor
 		
 
-		// IMPORTANT NOTICE! PID CONTROL-WORK IN PROGRESS BELOW!!!
+		// PID-Controller, regulating msg.angular.z
 
 		angvel_left = sensors[0].get_distance() - sensors[2].get_distance();
 		angvel_right = sensors[1].get_distance() - sensors[3].get_distance();
@@ -96,24 +96,10 @@ void wallfollower::runNode(){
 		err_right_prev = err_right;
 		Icontrol_right_prev = Icontrol_right;
 		//PIDcontrol_right_prev = PIDcontrol_right;
-
-
-		// Make angvel_left and angvel_right positive values
-		if (angvel_left < 0) {
-		angvel_left = -angvel_left;
-		}
-
-		if (angvel_right < 0) {
-		angvel_right = -angvel_right;
-		}
 		
-		double angvel_diff = angvel_left - angvel_right;
-		//double new_sensor0 = sensors[0].get_distance() + angvel_left;
 		
-
 		ROS_INFO(" angvel_left= %f", angvel_left);
 		ROS_INFO(" angvel_right= %f", angvel_right);
-		ROS_INFO(" angvel_diff = %f", angvel_diff);
 						
 		msg.linear.x = 0.4;
 		msg.angular.z = PIDcontrol_left;		
@@ -133,20 +119,18 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	angvel_right = 0.0;
 
 	/*setup the sensor calibration*/
-	sensors[0].calibrate(7.037*std::pow(10, -14),-1.552*std::pow(10, -10),
-		1.355*std::pow(10, -7),-6.017*std::pow(10, -5),
-		0.0145,-1.864,116.8, false);
-	sensors[1].calibrate(0,-7.107*std::pow(10, -12),1.306*std::pow(10, -8),
-		-9.541*std::pow(10, -6),0.003542,-0.7071,72.41, false);
-	sensors[2].calibrate(2.878*std::pow(10, -14),-6.602*std::pow(10, -11),
-		6.098*std::pow(10, -8),-2.936*std::pow(10, -5),
-		0.007948,-1.204,94.02, false);
-	sensors[3].calibrate(0,-1.043*std::pow(10, -11),1.973*std::pow(10, -8),
-		-1.461*std::pow(10, -5),0.00536,-1.014,91.89, false);
-	sensors[4].calibrate(0,-4.235*std::pow(10, -11),7.098*std::pow(10, -8),
-		-4.627*std::pow(10, -5),0.01486,-2.45,194.6, true);
-	sensors[5].calibrate(0,-3.199*std::pow(10, -11),5.346*std::pow(10, -8),
-		-3.489*std::pow(10, -5),0.0113,-1.91,161.8, true);
+	sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
+		2.079, -15.55, -25.63, 871.1, false);
+	sensors[1].calibrate(0, -0.0001057, 0.01266, -0.6095, 14.97, 
+		-192.1, 1198, false);
+	sensors[2].calibrate(-9.161*std::pow(10, -5), 0.008392, -0.3012,
+		5.273, -43.75, 98.26, 662, false);
+	sensors[3].calibrate(-1.215*std::pow(10, -5), 0.00113, -0.03767,
+		0.4372, 3.311, -126.2, 1069, false);
+	sensors[4].calibrate(0, -1.741*std::pow(10, -6), 0.0004776, -0.05162,
+		2.786, -78.43, 1084, true);
+	sensors[5].calibrate(0, -1.859*std::pow(10, -6), 0.0005059, -0.0542,
+		2.898, -80.75, 1096, true);
 	
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor2/twist", 1000);
 	sub_sensor = handle.subscribe("/arduino/adc", 1000, 			&wallfollower::sensorCallback, this);
