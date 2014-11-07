@@ -4,13 +4,14 @@ project(wallfollower)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  ras_arduino_msgs
+  rosutil
 )
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES wallfollower
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+  DEPENDS orocos_kdl
+  CATKIN_DEPENDS roscpp std_msgs ras_arduino_msgs  rosutil
+  INCLUDE_DIRS
 )
 
 include_directories(
@@ -18,5 +19,5 @@ include_directories(
 )
 
 add_executable(wallfollower src/wallfollower.cpp)
-target_link_libraries(wallfollower ${catkin_LIBRARIES})
+target_link_libraries(wallfollower ${catkin_LIBRARIES} rosutil)
 add_dependencies(wallfollower ${catkin_EXPORTED_TARGETS})

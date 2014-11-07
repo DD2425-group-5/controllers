@@ -1,0 +1,19 @@
+controllerwf: {
+
+GP_left: 0.0
+GI_left: 0.0
+GD_left: 0.0
+Gcontr_left: 0.0
+
+GP_right: 0.0
+GI_right: 0.0
+GD_right: 0.0
+Gcontr_right: 0.0
+
+PIDcontrol_time: 0.1
+PIDcontrol_freq: 10.0
+
+setpoint_left: 0.0
+setpoint_right: 0.0
+
+}
