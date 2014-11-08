@@ -4,8 +4,8 @@
   <rosparam file="$(find motor_controller2)/config/params.yaml" command="load" />
   <rosparam file="$(find project_launch)/config/global_params.yaml" command="load" />
   <rosparam file="$(find project_launch)/config/topic_names.yaml" command="load" />
-  <node name="motor_controller2" pkg="motor_controller2" type="motor_controller2" />
-  <!--node name="motor_controller2" pkg="motor_controller2" type="motor_controller2" output="screen" /-->
+  <node name="motor_controller2" pkg="motor_controller2" type="motor_controller2" output="screen" />
+  <!--node name="motor_controller2" pkg="motor_controller2" type="motor_controller2" /-->
      <!--node name="motor_controller2" pkg="motor_controller2" type="motor_controller2"  /--> 
 
     <!--  Twist x=0.8 

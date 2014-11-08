@@ -5,13 +5,7 @@ void wallfollower::sensorCallback(const ras_arduino_msgs::ADConverter msg){
 	for(int i=0;i<6;i++){
 		sensors[i].calculateDistance(tmp[i]);
 	}
-	/*ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
-	sensors[0].get_distance(),\
-	sensors[1].get_distance(),\
-	sensors[2].get_distance(),\
-	sensors[3].get_distance(),\
-	sensors[4].get_distance(),\
-	sensors[5].get_distance());*/
+	
 	
 	ROS_INFO("sensor distance: 1: [%d] 2: [%d] 3: [%d] 4: [%d] 5: [%d] 6: [%d] \n\n",\
 	sensors[0].get_value(),\
@@ -22,6 +16,18 @@ void wallfollower::sensorCallback(const ras_arduino_msgs::ADConverter msg){
 	sensors[5].get_value());
 }
 
+
+
+void wallfollower::encoderCallback(const ras_arduino_msgs::Encoders encoderValues){
+	totalEncoderFeedbackL = encoderValues.encoder1;
+	totalEncoderFeedbackR = encoderValues.encoder2;
+	//ROS_INFO("totalEncoderFeedbackL: %d, totalEncoderFeedbackR: %d \n\n",\
+	//totalEncoderFeedbackL,\
+	//totalEncoderFeedbackR);
+}
+
+
+
 void wallfollower::runNode(){
 	ros::Rate loop_rate(10);	//10 Hz
 	int tmpTime=0;
@@ -30,6 +36,8 @@ void wallfollower::runNode(){
 	while (ros::ok())			//main loop of this code
 	{
 		/*work in progress*/
+		
+	
 		/*ROS_INFO("STATE turn:[%d] goForth:[%d] stop:[%d] stopTime:[%d]",turn,goForth,stop,stopTime);
 		if(goForth && !stop){
 			v=marchSpeed;
@@ -215,7 +223,8 @@ wallfollower::wallfollower(int argc, char *argv[]){
 		-3.489*std::pow(10, -5),0.0113,-1.91,161.8, 80, 20);
 	
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor2/twist", 1000);
-	sub_sensor = handle.subscribe("/arduino/adc", 1000, 			&wallfollower::sensorCallback, this);
+	sub_sensor = handle.subscribe("/arduino/adc", 1000, &wallfollower::sensorCallback, this);
+	sub_encoder = handle.subscribe("/arduino/encoders", 1000, &wallfollower::encoderCallback, this);
 	
 	runNode();
 }
