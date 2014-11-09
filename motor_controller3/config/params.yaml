@@ -15,12 +15,12 @@ controller3: {
 
 
 controller_turn: {
-  Gp_R: 0.073,
-  Gp_L: 0.073,
-  Gi_R: 0.0,
-  Gi_L: 0.0,
-  Gd_R: 0.01,
-  Gd_L: 0.01,
+  Gp_R: 0.0450,
+  Gp_L: 0.050,
+  Gi_R: 0.005,
+  Gi_L: 0.006,
+  Gd_R: 0.015,
+  Gd_L: 0.015,
   Gc_R: 0.00,
   Gc_L: 0.00,
   

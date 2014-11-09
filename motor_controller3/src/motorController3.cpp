@@ -229,7 +229,7 @@ void MotorController3::runNodePrecisionTurn(){
 
 			//  CHEAT###
 			if (control_R_preSat <0.00001){
-				control_R_preSat-=54;
+				control_R_preSat-=55;
 			} else {
 				control_R_preSat+=55;
 			}
@@ -238,7 +238,7 @@ void MotorController3::runNodePrecisionTurn(){
 			if (control_L_preSat <0.00001){
 				control_L_preSat-=55;
 			} else {
-				control_L_preSat+=54;
+				control_L_preSat+=55;
 			}
 			// ###/CHEAT
 			
@@ -349,8 +349,8 @@ void MotorController3::runNodePrecisionTurn(){
 				control.PWM1 = control_R_preSat;
 			}
 
-			if (setpoint_dR <0.01 && setpoint_dR >-0.01){
-				control.PWM1 = 0;
+			if ((abs(err_R) <7)){
+			control.PWM1 = 0;
 			}
 
 
@@ -366,8 +366,8 @@ void MotorController3::runNodePrecisionTurn(){
 				control.PWM2 = control_L_preSat;
 			}
 
-			if (setpoint_dL <0.01 && setpoint_dL >-0.01){
-				control.PWM2 = 0;
+		if ((abs(err_L) <7)){
+			control.PWM2 = 0;
 			}
 
 
