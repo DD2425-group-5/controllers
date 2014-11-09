@@ -26,6 +26,19 @@ MotorController2::MotorController2(int argc, char *argv[]){
     ROSUtil::getParam(n, "/controller2/Gd_R", Gd_R);
     ROSUtil::getParam(n, "/controller2/Gc_L", Gc_L);
     ROSUtil::getParam(n, "/controller2/Gc_R", Gc_R);
+/*
+
+    ROSUtil::getParam(n, "/controller_turn/Gp_L", Gp_L);
+    ROSUtil::getParam(n, "/controller_turn/Gp_R", Gp_R);
+    ROSUtil::getParam(n, "/controller_turn/Gi_L", Gi_L);
+    ROSUtil::getParam(n, "/controller_turn/Gi_R", Gi_R);
+    ROSUtil::getParam(n, "/controller_turn/Gd_R", Gd_R);
+    ROSUtil::getParam(n, "/controller_turn/Gc_L", Gc_L);
+    ROSUtil::getParam(n, "/controller_turn/Gc_R", Gc_R);*/
+    ROSUtil::getParam(n, "/controller_turn/control_freq", control_frequency);
+    ROSUtil::getParam(n, "/controller_turn/control_time", control_time);
+
+
     ROSUtil::getParam(n, "/controller2/control_freq", control_frequency);
     ROSUtil::getParam(n, "/controller2/control_time", control_time);
     ROSUtil::getParam(n, "/robot_info/ticks_per_rev", ticks_per_rev);

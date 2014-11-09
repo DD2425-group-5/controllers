@@ -42,21 +42,25 @@ while (ros::ok())			//main loop of this code
 		relativeTotalEncoderFeedbackL = initialTotalEncoderFeedbackL - currentTotalEncoderFeedbackL; //relative to the begining moment;
 		relativeTotalEncoderFeedbackR = initialTotalEncoderFeedbackR - currentTotalEncoderFeedbackR;
 //DEBUG	
+std::cout << "currentTotalEncoderFeedbackR:" << currentTotalEncoderFeedbackR << std::endl;
+std::cout << "currentTotalEncoderFeedbackL:" << currentTotalEncoderFeedbackL << std::endl;
+
 		ROS_INFO("DEBUG L: initialFeedbackL [%d] -currentFeedbackL [%d] = relativeFeedbackL [%d]", initialTotalEncoderFeedbackL ,currentTotalEncoderFeedbackL, relativeTotalEncoderFeedbackL);
 		ROS_INFO("DEBUG R: initialFeedbackR [%d] -currentFeedbackR [%d] = relativeFeedbackR [%d]", initialTotalEncoderFeedbackR ,currentTotalEncoderFeedbackR, relativeTotalEncoderFeedbackR);
 // /DEBUG
 		
 
-		feedback = relativeTotalEncoderFeedbackL;
+		feedback = (-1)*relativeTotalEncoderFeedbackL;
 //DEBUG	
 		std::cout << "feedback:" << feedback << std::endl;
-		ROS_INFO("DEBUG feedback: (relativeFeedbackR [%d] -relativeFeedbackL [%d])/2 = feedback [%f]", relativeTotalEncoderFeedbackR ,relativeTotalEncoderFeedbackL, feedback);
+		
+ROS_INFO("DEBUG feedback: (relativeFeedbackR [%d] -relativeFeedbackL [%d])/2 = feedback [%f]", relativeTotalEncoderFeedbackR ,relativeTotalEncoderFeedbackL, feedback);
 		
 // /DEBUG
 
 
 
-		double proportionalGain = 0.0;
+		double proportionalGain = 0.001;
 		reference = ( (1.0/4.0) * 180.0 * robotBase / wheelRadius);
 		w = proportionalGain * (reference - feedback);
 	/* /P_controller   */
