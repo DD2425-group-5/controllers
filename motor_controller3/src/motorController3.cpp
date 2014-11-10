@@ -7,6 +7,7 @@ MotorController3::MotorController3(int argc, char *argv[]){
     w = 0.0;
     nodeSeek_is_ready = false;
 	subscription_is_ready = false;
+    turnIsReady = false;     // initalize the tuning status;
 	precisionTurning = 0.0;
 	ROS_INFO("START_HERE!!!! is node ready?: %d", nodeSeek_is_ready);
     std::string pwm_pub_topic;
@@ -15,9 +16,11 @@ MotorController3::MotorController3(int argc, char *argv[]){
     ROSUtil::getParam(n, "/topic_list/robot_topics/published/encoder_topic", encoder_sub_topic);
     std::string twist_sub_topic;
     ROSUtil::getParam(n, "/topic_list/controller_topics/motor3/subscribed/twist_topic", twist_sub_topic);
-    
+    std::string info_sub_topic;
+    ROSUtil::getParam(n, "/topic_list/controller_topics/motor3/published/bool_topic", info_sub_topic);
     
     chatter_pub = n.advertise<ras_arduino_msgs::PWM>(pwm_pub_topic, 1000);
+    info_pub = n.advertise<std_msgs::Bool>(info_sub_topic, 1000);
     sub_feedback = n.subscribe(encoder_sub_topic, 1000,&MotorController3::feedbackCallback, this);
     sub_setpoint = n.subscribe(twist_sub_topic, 1000,&MotorController3::setpointCallback, this);
 
@@ -49,12 +52,14 @@ MotorController3::MotorController3(int argc, char *argv[]){
     ROSUtil::getParam(n, "/controller3/satMax", satMAX);
     ROSUtil::getParam(n, "/controller_turn/satMin", satMINt);
     ROSUtil::getParam(n, "/controller_turn/satMax", satMAXt);
-ROS_INFO("START DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
-	 setpoint_wL=0.0;
-	 feedback_dL=0.0;
-	 setpoint_wR=0.0;
-	 feedback_dR=0.0;
-	ROS_INFO("AFTER DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
+    ROS_INFO("START DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  \
+    setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
+    setpoint_wL=0.0;
+    feedback_dL=0.0;
+    setpoint_wR=0.0;
+    feedback_dR=0.0;
+	ROS_INFO("AFTER DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  \
+    setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
 	while (ros::ok()){
 
 		if ((precisionTurning > -180    && precisionTurning < -0.0001) ||\ 
@@ -167,7 +172,9 @@ void MotorController3::runNodePrecisionTurn(){
     float control_OLD_R_postSat = 0.0;
     float err_OLD_L = 0.0;
     float err_OLD_R = 0.0;
-	relativeFeedback_dL = 0.0;
+    bool turnIsReadyL = false;
+    bool turnIsReadyR = false;
+    relativeFeedback_dL = 0.0;
 	relativeFeedback_dR = 0.0;
 	initialFeedback_dL = -1;
 	initialFeedback_dR = -1;
@@ -176,7 +183,7 @@ void MotorController3::runNodePrecisionTurn(){
     while (ros::ok() &&\
 		 ((precisionTurning > -180    && precisionTurning < -0.0001) ||\ 
 	      (precisionTurning > 0.0001  && precisionTurning < 180.0))    ){
-
+            
 			ROS_INFO("\n\nPRECISSION TURNING MODE:");
 			if (initialFeedback_dL == -1 || initialFeedback_dR == -1){
 				ROS_INFO("\nFEEDBACK NOT READY! WAITING FOR FEEDBACK.........");
@@ -186,6 +193,9 @@ void MotorController3::runNodePrecisionTurn(){
 			relativeFeedback_dL = initialFeedback_dL - feedback_dL; //relative to the begining moment;
 			relativeFeedback_dR = initialFeedback_dR - feedback_dR; //relative to the begining moment;
 			
+            turnIsReadyL = false; // re-initialize turn flags as false until proven otherwise
+            turnIsReadyR = false;
+
 			//DEBUG	
 			std::cout<< "initial feedback_dL[" << initialFeedback_dL<<\
 						"] - current feedback_dL[" << feedback_dL<<\
@@ -194,7 +204,8 @@ void MotorController3::runNodePrecisionTurn(){
 						"] - current feedback_dR[" << feedback_dR<<\
 						"] = relative feedback_dR =" << relativeFeedback_dR << std::endl;
 			}
-			ROS_INFO("Launched with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f", Gp_Lt, Gi_Lt, Gd_Lt, Gp_Rt, Gi_Rt, Gd_Rt);
+			ROS_INFO("Launched with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f",\ 
+            Gp_Lt, Gi_Lt, Gd_Lt, Gp_Rt, Gi_Rt, Gd_Rt);
 			ROS_INFO("L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",\
 						setpoint_dL,relativeFeedback_dL, setpoint_dR, relativeFeedback_dR);
 
@@ -205,7 +216,8 @@ void MotorController3::runNodePrecisionTurn(){
 
 			//controller Right wheel (PWM1), INCL Antiwindup
 			control_p_R=Gp_Rt*err_R;
-			control_i_R=control_i_OLD_R + (control_time*Gi_Rt)*err_R +(Gc_Rt/Gp_Rt)* (control_OLD_R_postSat - control_OLD_R_preSat);
+			control_i_R=control_i_OLD_R + (control_time*Gi_Rt)*err_R +(Gc_Rt/Gp_Rt)*\
+            (control_OLD_R_postSat - control_OLD_R_preSat);
 			control_d_R= (Gd_Rt/control_time)*(err_R-err_OLD_R);
 			control_R_preSat = control_p_R + control_i_R + control_d_R;
 
@@ -216,7 +228,8 @@ void MotorController3::runNodePrecisionTurn(){
 
 			//controller Left wheel (PWM2), INCL Antiwindup
 			control_p_L=Gp_Lt*err_L;
-			control_i_L=control_i_OLD_L + (control_time*Gi_Lt)*err_L +(Gc_Lt/Gp_Lt)* (control_OLD_L_postSat - control_OLD_L_preSat);
+			control_i_L=control_i_OLD_L + (control_time*Gi_Lt)*err_L +(Gc_Lt/Gp_Lt)* \
+            (control_OLD_L_postSat - control_OLD_L_preSat);
 			ROS_INFO("err_L %f",err_L);
 			ROS_INFO("control_i_L %f",control_i_L);
 			control_d_L= (Gd_Lt/control_time)*(err_L-err_OLD_L);
@@ -248,90 +261,6 @@ void MotorController3::runNodePrecisionTurn(){
 			
 			ROS_INFO("setpoint_dR %f",setpoint_dR);
 
-/*
-			//APPLY SATURATION (not working)
-			//RIGHT WHEEL
-			if (control_R_preSat >= satMAXt){
-				control.PWM1 = satMAXt;
-			}
-			if (control_R_preSat <=(-1)*(satMAXt)){
-				control.PWM1 = (-1)*(satMAXt);
-			} 
-			/*if (setpoint_dR <0.01 && setpoint_dR >-0.01){
-				ROS_INFO("FORCING R CONTROL TO 0!");
-				control.PWM1 = 0;
-			}* /
-
-
-			//LEFT WHEEL
-			
-			if (control_L_preSat >= satMAXt){
-				control.PWM2 = satMAXt;
-			}
-			if (control_L_preSat <=(-1)*(satMAXt)){
-				control.PWM2 = (-1)*(satMAXt);
-			} 
-			/*if (setpoint_dL <0.01 && setpoint_dL >-0.01){
-				ROS_INFO("FORCING L CONTROL TO 0!");
-				control.PWM2 = 0;
-			}
-
-* /              */
-
-
-
-
-
-/*
-			//APPLY SATURATION (OLD, full)
-			//RIGHT WHEEL
-			if (control_R_preSat < satMINt && setpoint_dR>0){
-				control.PWM1 = satMINt;
-			} else if (control_R_preSat > satMAXt && setpoint_dR>0){
-
-				control.PWM1 = satMAXt;
-			}
-
-
-			else if (control_R_preSat > (-1)*satMINt && setpoint_dR<0){
-				control.PWM1 = (-1)*satMINt;
-			} else if (control_R_preSat < (-1)*satMAXt && setpoint_dR<0){
-				control.PWM1 = (-1)*satMAXt;
-			} else{
-				control.PWM1 = control_R_preSat;
-			}
-
-			if (setpoint_dR <0.01 && setpoint_dR >-0.01){
-				control.PWM1 = 0;
-			}
-
-
-			//LEFT WHEEL
-			if (control_L_preSat < satMINt && setpoint_dL>0){
-				control.PWM2 = satMIN;
-			} else if (control_L_preSat > satMAXt  && setpoint_dL>0){
-				control.PWM2 = satMAX;
-			}
-
-			else if (control_L_preSat >(-1)*(satMINt) && setpoint_dL<0){
-				control.PWM2 = (-1)*(satMIN);
-			} else if (control_L_preSat <(-1)*(satMAXt) && setpoint_dL<0){
-				control.PWM2 = (-1)*(satMAXt);
-			} else{
-				control.PWM2 = control_L_preSat;
-			}
-
-			if (setpoint_dL <0.01 && setpoint_dL >-0.01){
-				control.PWM2 = 0;
-			}
-
-
-*/
-
-
-
-
-
 
 			//APPLY SATURATION (OLD, cut)
 			//RIGHT WHEEL
@@ -350,7 +279,8 @@ void MotorController3::runNodePrecisionTurn(){
 			}
 
 			if ((abs(err_R) <7)){
-			control.PWM1 = 0;
+                turnIsReadyR = true;
+			    control.PWM1 = 0;
 			}
 
 
@@ -366,20 +296,18 @@ void MotorController3::runNodePrecisionTurn(){
 				control.PWM2 = control_L_preSat;
 			}
 
-		if ((abs(err_L) <7)){
-			control.PWM2 = 0;
+		    if ((abs(err_L) <7)){ 
+                turnIsReadyL = true;              
+                control.PWM2 = 0;
 			}
 
-
-
-
-
-
-
-
-
-
-
+            //turn is ready flag
+            if (turnIsReadyL && turnIsReadyR){
+                turnIsReady = true;
+            } else{
+                turnIsReady = false;
+            }
+                
 
 			control_OLD_R_postSat = control.PWM1;
 			control_OLD_L_postSat = control.PWM2;
@@ -388,6 +316,10 @@ void MotorController3::runNodePrecisionTurn(){
 
 			ROS_INFO("Control: pwm2(L): %d, pwm1(R): %d", control.PWM2, control.PWM1);
 			chatter_pub.publish(control);
+            std_msgs::Bool msg;
+            msg.data = turnIsReady;
+            ROS_INFO("IS TURNING READY????: %d", msg.data);
+			info_pub.publish(msg);
 			ros::spinOnce();
 			loop_rate.sleep();
 			}
@@ -425,8 +357,10 @@ void MotorController3::runNodeSeek(){
 
     while (ros::ok() && (precisionTurning > -0.0001 && precisionTurning < 0.0001)) {
 			ROS_INFO("\n\nSEEK AND DESTROY MODE:");
-			ROS_INFO("Launching with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f", Gp_L, Gi_L, Gd_L, Gp_R, Gi_R, Gd_R);
-			ROS_INFO("L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
+			ROS_INFO("Launching with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f", \
+            Gp_L, Gi_L, Gd_L, Gp_R, Gi_R, Gd_R);
+			ROS_INFO("L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  \
+            setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
 
 			ras_arduino_msgs::PWM control;
 			//Control error, current
@@ -435,7 +369,8 @@ void MotorController3::runNodeSeek(){
 
 			//controller Right wheel (PWM1), INCL Antiwindup
 			control_p_R=Gp_R*err_R;
-			control_i_R=control_i_OLD_R + (control_time*Gi_R)*err_R +(Gc_R/Gp_R)* (control_OLD_R_postSat - control_OLD_R_preSat);
+			control_i_R=control_i_OLD_R + (control_time*Gi_R)*err_R +(Gc_R/Gp_R)* \
+            (control_OLD_R_postSat - control_OLD_R_preSat);
 			control_d_R= (Gd_R/control_time)*(err_R-err_OLD_R);
 			control_R_preSat = control_p_R + control_i_R + control_d_R;
 
@@ -446,7 +381,8 @@ void MotorController3::runNodeSeek(){
 
 			//controller Left wheel (PWM2), INCL Antiwindup
 			control_p_L=Gp_L*err_L;
-			control_i_L=control_i_OLD_L + (control_time*Gi_L)*err_L +(Gc_L/Gp_L)* (control_OLD_L_postSat - control_OLD_L_preSat);
+			control_i_L=control_i_OLD_L + (control_time*Gi_L)*err_L +(Gc_L/Gp_L)* \
+            (control_OLD_L_postSat - control_OLD_L_preSat);
 	
 
 			ROS_INFO("err_L %f",err_L);
