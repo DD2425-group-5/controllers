@@ -30,7 +30,7 @@ void sensor::calculateDistance(int val){
 		ROS_INFO("%d: %f",19,record[19]);
 	}*/
 	// TEMP SOULUTION REALY UGLY
-	if(value<110){
+	if(value<120){
 		value=-1;
 	}
 	for(int i=0;i<29;i++){
@@ -43,7 +43,7 @@ void sensor::calculateDistance(int val){
 }
 
 int sensor::hasContact(){
-	if(record[29]>0 && record[28]>0 /*&& record[17]>0 */){
+	if(record[29]>0 /*&& record[28]>0 /*&& record[17]>0 */){
 		return 1;
 	}
 	else{
@@ -76,6 +76,8 @@ void sensor::calibrate(double xx6,double xx5,double xx4,double xx3,double xx2,do
 	n=nn;
 	maxRange=max;
 	minRange=min;
+	value=-1;
+	distance=-1;
 }
 
 int sensor::get_number(){
