@@ -467,9 +467,9 @@ void MotorController3::runNodeSeek(){
 
 
 			if (setpoint_wL <0.01){
-				control_L_preSat-=31;
+				control_L_preSat-=30;
 			} else {
-				control_L_preSat+=31;
+				control_L_preSat+=30;
 			}
 
 			// /CHEAT
