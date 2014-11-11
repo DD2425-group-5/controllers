@@ -2,5 +2,6 @@
 
 	<node name="wallfollower" pkg="wallfollower" type="wallfollower" output="screen" />
 	<rosparam file="$(find wallfollower)/config/paramswf.yaml" command="load" />
+	<rosparam file="$(find wallfollower)/config/paramsens.yaml" command="load" />
 	
 </launch>

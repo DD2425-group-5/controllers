@@ -30,6 +30,36 @@ private:
 	float contr_time;
 	float contr_freq;
 
+	double a0;
+	double b0;
+	double c0;
+	double d0;
+
+	double a1;
+	double b1;
+	double c1;
+	double d1;
+
+	double a2;
+	double b2;
+	double c2;
+	double d2;
+
+	double a3;
+	double b3;
+	double c3;
+	double d3;
+
+	double a4;
+	double b4;
+	double c4;
+	double d4;
+
+	double a5;
+	double b5;
+	double c5;
+	double d5;
+
 	sensor sensors[6];
 	sensor s1;
 	ros::Subscriber sub_sensor;	//sub to get distance values
