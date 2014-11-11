@@ -1,11 +1,11 @@
 #include "ros/ros.h"
+#include "std_msgs/Int32.h"
 #include "geometry_msgs/Twist.h"
 #include "ras_arduino_msgs/ADConverter.h"
 #include "sensor.cpp"
 #include <rosutil/rosutil.hpp>
 #include <math.h>
 #include <sstream>
-
 
 class wallfollower {
 public:
@@ -27,8 +27,8 @@ private:
 	double angvel_left;
 	double angvel_right;
 
-	float PIDcontrol_time;
-	float PIDcontrol_freq;
+	float contr_time;
+	float contr_freq;
 
 	sensor sensors[6];
 	sensor s1;

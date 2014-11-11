@@ -5,8 +5,8 @@
 }*/
 
 void wallfollower::sensorCallback(const ras_arduino_msgs::ADConverter msg){
-	int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
-	for(int i=0;i<6;i++){
+	int tmp[] ={msg.ch1, msg.ch2, msg.ch3, msg.ch4, msg.ch7, msg.ch8};
+	for(int i=0; i<6; i++){
 		sensors[i].calculateDistance(tmp[i]);
 	}
 	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
@@ -44,7 +44,7 @@ void wallfollower::runNode(){
 	double PIDcontrol_right = 0.0;
 	//double PIDcontrol_right_prev = 0.0;
 
-	ros::Rate loop_rate(10);	//10 Hz
+	ros::Rate loop_rate(contr_freq);	//10 Hz
 	while (ros::ok())			//main loop of this code
 	{
 		/*work in progress*/
@@ -76,15 +76,15 @@ void wallfollower::runNode(){
 
 		// Left sensors controller
 		Pcontrol_left = GP_left*err_left;
-		Icontrol_left = Icontrol_left_prev + PIDcontrol_time*GI_left*err_left; //+ (Gcontr_left/GP_left)*(
-		Dcontrol_left = (GD_left/PIDcontrol_time)*(err_left - err_left_prev);
+		Icontrol_left = Icontrol_left_prev + contr_time*GI_left*err_left; //+ (Gcontr_left/GP_left)*(
+		Dcontrol_left = (GD_left/contr_time)*(err_left - err_left_prev);
 		PIDcontrol_left = Pcontrol_left + Icontrol_left + Dcontrol_left;
 
 
 		// Right sensors controller
 		Pcontrol_right = GP_right*err_right;
-		Icontrol_right = Icontrol_right_prev + PIDcontrol_time*GI_right*err_right; 
-		Dcontrol_right = (GD_right/PIDcontrol_time)*(err_right - err_right_prev);
+		Icontrol_right = Icontrol_right_prev + contr_time*GI_right*err_right; 
+		Dcontrol_right = (GD_right/contr_time)*(err_right - err_right_prev);
 		PIDcontrol_right = Pcontrol_right + Icontrol_right + Dcontrol_right;
 
 
@@ -101,8 +101,8 @@ void wallfollower::runNode(){
 		ROS_INFO(" angvel_left= %f", angvel_left);
 		ROS_INFO(" angvel_right= %f", angvel_right);
 						
-		msg.linear.x = 0.4;
-		msg.angular.z = PIDcontrol_left;		
+		msg.linear.x = 0; //0.4;
+		msg.angular.z = 0; //PIDcontrol_left;		
 
 		pub_motor.publish(msg);		//pub to motor
 		ROS_INFO(" msg.angular.z = %f", msg.angular.z);		
@@ -118,22 +118,34 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	angvel_left = 0.0;
 	angvel_right = 0.0;
 
-	/*setup the sensor calibration*/
-	sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
-		2.079, -15.55, -25.63, 871.1, false);
+	/*setup the sensor calibration*/ // RECALIBRATE SENSORS 0-4!
+
+	sensors[0].calibrate(0, -8.061*std::pow(10, -8), 7.041*std::pow(10, -5),
+		-0.02451, 4.252, -367.7, 1.271*std::pow(10, 4), false);
 	sensors[1].calibrate(0, -0.0001057, 0.01266, -0.6095, 14.97, 
 		-192.1, 1198, false);
 	sensors[2].calibrate(-9.161*std::pow(10, -5), 0.008392, -0.3012,
 		5.273, -43.75, 98.26, 662, false);
 	sensors[3].calibrate(-1.215*std::pow(10, -5), 0.00113, -0.03767,
 		0.4372, 3.311, -126.2, 1069, false);
-	sensors[4].calibrate(0, -1.741*std::pow(10, -6), 0.0004776, -0.05162,
-		2.786, -78.43, 1084, true);
-	sensors[5].calibrate(0, -1.859*std::pow(10, -6), 0.0005059, -0.0542,
-		2.898, -80.75, 1096, true);
+	sensors[4].calibrate(0, -4.235*std::pow(10, -11), 7.098*std::pow(10, -8),
+		-4.627*std::pow(10, -5), 0.01486, -2.45, 194.6, true);
+	sensors[5].calibrate(0, -3.199*std::pow(10, -11), 5.346*std::pow(10, -8),
+		-3.489*std::pow(10, -5), 0.0113, -1.91, 161.8, true);
 	
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor2/twist", 1000);
-	sub_sensor = handle.subscribe("/arduino/adc", 1000, 			&wallfollower::sensorCallback, this);
+	sub_sensor = handle.subscribe("/arduino/adc", 1000, &wallfollower::sensorCallback, this);
+	
+	/*GP_left = 1.0;
+	GI_left = 0.0;
+	GD_left = 0.0;
+	Gcontr_left = 0.0;
+	GP_right = 0.0;
+	GI_right = 0.0;
+	GD_right = 0.0;
+	Gcontr_right = 0.0;
+	contr_freq = 10.0;
+	contr_time = 0.1;*/
 	
 	ROSUtil::getParam(handle, "/controllerwf/GP_left", GP_left);
 	ROSUtil::getParam(handle, "/controllerwf/GI_left", GI_left);
@@ -143,8 +155,8 @@ wallfollower::wallfollower(int argc, char *argv[]){
     	ROSUtil::getParam(handle, "/controllerwf/GI_right", GI_right);
     	ROSUtil::getParam(handle, "/controllerwf/GD_right", GD_right);
     	ROSUtil::getParam(handle, "/controllerwf/Gcontr_right", Gcontr_right);
-    	ROSUtil::getParam(handle, "/controllerwf/PIDcontrol_freq", PIDcontrol_freq);
-    	ROSUtil::getParam(handle, "/controllerwf/PIDcontrol_time", PIDcontrol_time);
+    	ROSUtil::getParam(handle, "/controllerwf/contr_freq", contr_freq);
+    	ROSUtil::getParam(handle, "/controllerwf/contr_time", contr_time);
     	
 	runNode();
 }
