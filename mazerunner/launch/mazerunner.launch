@@ -1,0 +1,7 @@
+<launch>
+
+	<node name="mazerunner" pkg="mazerunner" type="mazerunner" output="screen" />
+	<rosparam file="$(find mazerunner)/config/paramswf.yaml" command="load" />
+	<rosparam file="$(find mazerunner)/config/paramsens.yaml" command="load" />
+	
+</launch>
