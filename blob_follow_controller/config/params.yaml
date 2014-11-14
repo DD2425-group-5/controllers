@@ -1,0 +1,7 @@
+blob_follower: {
+  desired_depth: 500,
+  width_tolerance: 30,
+  depth_tolerance: 60,
+  linear_speed: 0.1,
+  angular_speed: 0.1
+}

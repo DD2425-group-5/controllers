@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>milestone0controller</name>
+  <name>wallfollower</name>
   <version>0.0.0</version>
-  <description>The milestone0controller package</description>
+  <description>The wallfollower package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/milestone0controller</url> -->
+  <!-- <url type="website">http://wiki.ros.org/wallfollower</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -28,13 +28,23 @@
   <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
 
 
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <!-- Examples: -->
+  <!-- Use build_depend for packages you need at compile time: -->
+  <!--   <build_depend>message_generation</build_depend> -->
+  <!-- Use buildtool_depend for build tool packages: -->
+  <!--   <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- Use run_depend for packages you need at runtime: -->
+  <!--   <run_depend>message_runtime</run_depend> -->
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>roscpp</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
   <run_depend>roscpp</run_depend>
-  <buildtool_depend>geometry_msgs</buildtool_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <buildtool_depend>blobdetection</buildtool_depend>
-  <run_depend>blobdetection</run_depend>  
+  <run_depend>std_msgs</run_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

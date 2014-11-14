@@ -50,34 +50,34 @@ ros::NodeHandle MotorController::nodeSetup(int argc, char* argv[]){
      * are read from the parameter server, or defaults are set if the parameter does
      * not exist
      */
-    handle.param<double>("/robot/wheel_baseline", WHEEL_BASELINE, 0.2);
-    handle.param<double>("/robot/wheel_radius", WHEEL_RADIUS, 0.0352);
+    handle.param<double>("/robot_info/wheel_baseline", WHEEL_BASELINE, 0.2);
+    handle.param<double>("/robot_info/wheel_radius", WHEEL_RADIUS, 0.0352);
     handle.param<double>("/controller/left_gain", LEFT_GAIN, 0.5);
     handle.param<double>("/controller/right_gain", RIGHT_GAIN, 0.5);
     handle.param<int>("/controller/control_freq", CONTROL_FREQ, 10);
     handle.param<int>("/controller/ticks_per_rev", TICKS_PER_REV, 360);
 
-    std::string pwm_topic;
-    if (!handle.getParam("/motorController/pwm_topic", pwm_topic)){
-	ROS_ERROR("/motorController/pwm_topic is not defined!");
+    std::string pwm_pub_topic;
+    if (!handle.getParam("/topic_list/robot_topics/subscribed/pwm_topic", pwm_pub_topic)){
+	ROS_ERROR("/topic_list/robot_topics/subscribed/pwm_topic is not defined!");
 	std::exit(1);
     }
     
-    std::string encoder_topic;
-    if (!handle.getParam("/motorController/encoder_topic", encoder_topic)){
-	ROS_ERROR("/motorController/encoder_topic is not defined!");
+    std::string encoder_sub_topic;
+    if (!handle.getParam("/topic_list/robot_topics/published/encoder_topic", encoder_sub_topic)){
+	ROS_ERROR("/topic_list/robot_topics/published/encoder_topic is not defined!");
 	std::exit(1);
     }
 
-    std::string twist_topic;
-    if (!handle.getParam("/motorController/twist_topic", twist_topic)){
-	ROS_ERROR("/motorController/twist_topic is not defined!");
+    std::string twist_sub_topic;
+    if (!handle.getParam("/topic_list/controller_topics/basic/subscribed/twist_topic", twist_sub_topic)){
+	ROS_ERROR("/topic_list/controller_topics/basic/subscribed/twist_topic is not defined!");
 	std::exit(1);
     }
     
-    pub_PWM = handle.advertise<ras_arduino_msgs::PWM>(pwm_topic, 1000);
-    sub_enc = handle.subscribe(encoder_topic, 1000, &MotorController::encoderCallback, this);
-    sub_twist = handle.subscribe(twist_topic, 1000, &MotorController::twistCallback, this); 
+    pub_PWM = handle.advertise<ras_arduino_msgs::PWM>(pwm_pub_topic, 1000);
+    sub_enc = handle.subscribe(encoder_sub_topic, 1000, &MotorController::encoderCallback, this);
+    sub_twist = handle.subscribe(twist_sub_topic, 1000, &MotorController::twistCallback, this); 
 
     return handle;
 }

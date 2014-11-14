@@ -1,0 +1,29 @@
+controller2: {
+  Gp_R: 10.0,
+  Gp_L: 10.0,
+  Gi_R: 0.9,
+  Gi_L: 0.9,
+  Gd_R: 0.1,
+  Gd_L: 0.1,
+  Gc_R: 0.0,
+  Gc_L: 0.0,
+  control_freq: 10,
+  control_time: 0.1,
+  satMin: 40.0,
+  satMax: 150.0
+}
+
+controller_turn: {
+  Gp_R: 1.0,
+  Gp_L: 1.0,
+  Gi_R: 0.05,
+  Gi_L: 0.05,
+  Gd_R: 0.1,
+  Gd_L: 0.1,
+  Gc_R: 1.0,
+  Gc_L: 1.0,
+  control_freq: 10,
+  control_time: 0.1,
+  satMin: 40.0,
+  satMax: 150.0
+}
