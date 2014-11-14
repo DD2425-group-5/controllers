@@ -25,6 +25,8 @@ private:
 	int change;
 	void (wallfollower::*states[64])();	// state pointers
 	void (wallfollower::*statep)();	//state pointer
+	int stop;
+	int hz;
 	
 	int started;			//has it collected its first state?
 	int stoptime;			//stoptime for the turning controller
@@ -49,4 +51,17 @@ private:
 	void state0init();	//turn L
 	void state0begin();	//turn L
 	void state0end();	//turn L
+	void state0special();	//special state to deal with turn
+	void state0special2();	//special state to deal with turn
+	void state0special3();	//special state to deal with turn
+	void state53init();	//turn R
+	void state53begin();//turn R
+	void state53end();	//turn R
+	void state55init(); //turn 180
+	void state55begin(); //turn 180
+	void state55middle();
+	void state55second();
+	void state55end();	//turn 180
+	void drive1sec();
+	void drive1secend();
 };
