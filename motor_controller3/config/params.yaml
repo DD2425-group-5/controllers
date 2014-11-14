@@ -1,6 +1,6 @@
 controller3: {
-  Gp_R: 10.25,
-  Gp_L: 10.0,
+  Gp_R: 10.0,
+  Gp_L: 10.4,
   Gi_R: 0.9,
   Gi_L: 0.9,
   Gd_R: 0.1,
@@ -14,7 +14,7 @@ controller3: {
 }
 
 
-controller_turn: {
+controller_turn_old: { #_old
   Gp_R: 0.0450,
   Gp_L: 0.050,
   Gi_R: 0.005,
@@ -23,6 +23,34 @@ controller_turn: {
   Gd_L: 0.015,
   Gc_R: 0.00,
   Gc_L: 0.00,
+  
+  satMin: 0.1,
+  satMax: 150.0
+}
+
+controller_turn_save50: { #_new
+  Gp_R: 0.15,
+  Gp_L: 0.15,
+  Gi_R: 0.02,
+  Gi_L: 0.02,
+  Gd_R: 0.0,
+  Gd_L: 0.0,
+  Gc_R: 0.00,
+  Gc_L: 0.00,
+  
+  satMin: 0.1,
+  satMax: 150.0
+}
+
+controller_turn: { #_new_lowBATT
+  Gp_R: 0.19,
+  Gp_L: 0.21,
+  Gi_R: 0.019,
+  Gi_L: 0.021,
+  Gd_R: 0.028,
+  Gd_L: 0.032,
+  Gc_R: 0.0,
+  Gc_L: 0.0,
   
   satMin: 0.1,
   satMax: 150.0

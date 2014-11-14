@@ -133,8 +133,8 @@ void MotorController3::setpointCallback( geometry_msgs::Twist setpoint)
 		setpoint_dL=float(-1.0)*setpoint_dR;
 		setpoint_wL=0.0;
 		setpoint_wR=0.0;
-		std::cout << "PRECISION TUNING MODE ENGAGED @ " << precisionTurning << "DEG" << std::endl;
-		std::cout << "DEBUG setpoint_dR " << setpoint_dR << "DEBUG setpoint_dL " << setpoint_dL << std::endl;
+		//std::cout << "PRECISION TUNING MODE ENGAGED @ " << precisionTurning << "DEG" << std::endl;
+		//std::cout << "DEBUG setpoint_dR " << setpoint_dR << "DEBUG setpoint_dL " << setpoint_dL << std::endl;
 	}
 
 	else {
@@ -142,7 +142,7 @@ void MotorController3::setpointCallback( geometry_msgs::Twist setpoint)
 		setpoint_wR=(v+(robotBase/2)*w)/wheelRadius;
 		setpoint_dL=0.0;
 		setpoint_dR=0.0;
-		std::cout << "SEEK & DESTROY MODE ENGAGED @ " << v << "M/S & " << w << "RAD/S" << std::endl;
+		//std::cout << "SEEK & DESTROY MODE ENGAGED @ " << v << "M/S & " << w << "RAD/S" << std::endl;
 	}
 }
 
@@ -205,7 +205,7 @@ void MotorController3::runNodePrecisionTurn(){
 						"] = relative feedback_dR =" << relativeFeedback_dR << std::endl;
 			}
 			ROS_INFO("Launched with Gp_L= %f, Gi_L=%f, Gd_L=%f, Gp_R= %f, Gi_R=%f, Gd_R=%f",\ 
-            Gp_Lt, Gi_Lt, Gd_Lt, Gp_Rt, Gi_Rt, Gd_Rt);
+            		Gp_Lt, Gi_Lt, Gd_Lt, Gp_Rt, Gi_Rt, Gd_Rt);
 			ROS_INFO("L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",\
 						setpoint_dL,relativeFeedback_dL, setpoint_dR, relativeFeedback_dR);
 
@@ -217,7 +217,7 @@ void MotorController3::runNodePrecisionTurn(){
 			//controller Right wheel (PWM1), INCL Antiwindup
 			control_p_R=Gp_Rt*err_R;
 			control_i_R=control_i_OLD_R + (control_time*Gi_Rt)*err_R +(Gc_Rt/Gp_Rt)*\
-            (control_OLD_R_postSat - control_OLD_R_preSat);
+            		(control_OLD_R_postSat - control_OLD_R_preSat);
 			control_d_R= (Gd_Rt/control_time)*(err_R-err_OLD_R);
 			control_R_preSat = control_p_R + control_i_R + control_d_R;
 
@@ -229,11 +229,12 @@ void MotorController3::runNodePrecisionTurn(){
 			//controller Left wheel (PWM2), INCL Antiwindup
 			control_p_L=Gp_Lt*err_L;
 			control_i_L=control_i_OLD_L + (control_time*Gi_Lt)*err_L +(Gc_Lt/Gp_Lt)* \
-            (control_OLD_L_postSat - control_OLD_L_preSat);
+            		(control_OLD_L_postSat - control_OLD_L_preSat);
 			ROS_INFO("err_L %f",err_L);
 			ROS_INFO("control_i_L %f",control_i_L);
 			control_d_L= (Gd_Lt/control_time)*(err_L-err_OLD_L);
-			control_L_preSat = control_p_L + control_i_L + control_d_L; //controller output before the saturation
+			control_L_preSat = control_p_L + control_i_L + control_d_L; 
+			//controller output before the saturation
 			//save values for next iteration
 			err_OLD_L = err_L;
 			control_i_OLD_L = control_i_L;
@@ -242,16 +243,16 @@ void MotorController3::runNodePrecisionTurn(){
 
 			//  CHEAT###
 			if (control_R_preSat <0.00001){
-				control_R_preSat-=55;
+				control_R_preSat-=36;
 			} else {
-				control_R_preSat+=55;
+				control_R_preSat+=36;
 			}
 				//ADD 0 cheat for 0?
 
 			if (control_L_preSat <0.00001){
-				control_L_preSat-=55;
+				control_L_preSat-=36;
 			} else {
-				control_L_preSat+=55;
+				control_L_preSat+=36;
 			}
 			// ###/CHEAT
 			
@@ -403,9 +404,9 @@ void MotorController3::runNodeSeek(){
 
 
 			if (setpoint_wL <0.01){
-				control_L_preSat-=30;
+				control_L_preSat-=31; //used to be 30
 			} else {
-				control_L_preSat+=30;
+				control_L_preSat+=31;
 			}
 
 			// /CHEAT
