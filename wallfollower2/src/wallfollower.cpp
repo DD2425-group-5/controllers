@@ -44,7 +44,7 @@ void wallfollower::isTurningCallback(const std_msgs::Bool msg){
 }
 
 void wallfollower::runNode(){
-	ros::Rate loop_rate(10);	//10 Hz
+	ros::Rate loop_rate(hz);	//10 Hz
 	wait(5);
 	while (ros::ok())			//main loop of this code
 	{
@@ -54,9 +54,17 @@ void wallfollower::runNode(){
 			//state;
 			//te
 			//state = currentState();
+			char tmp2 = currentState();
+			tmp2 = tmp2 & 0b00110011;
+			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
+				prevState=state;
+				state = 0b00110011;
+				statep=&wallfollower::state55init;
+				stop=1;
+			}
 			char tmp = currentState();
 			tmp = tmp & 0b00110101;
-			if(tmp==53 && !stop && !turn){
+			if((tmp==53 || tmp==21 || tmp==49) && !stop && !turn){
 				prevState=state;
 				state = 0b00110101;
 				statep=&wallfollower::state53init;
@@ -131,7 +139,7 @@ void wallfollower::state0begin(){
 	//y=90.0;
 	if(wait()){
 		y=90;
-		wait(70);
+		wait(30);
 		statep=&wallfollower::state0end;
 	}
 }
@@ -214,7 +222,7 @@ void wallfollower::state53begin(){
 	ROS_INFO("STATE: TURN GOING =%d",turn);
 	if(wait()){
 		y=-90.0;
-		wait(70);
+		wait(30);
 		statep=&wallfollower::state53end;
 	}
 }
@@ -230,10 +238,77 @@ void wallfollower::state53end(){
 	}
 }
 
+void wallfollower::state55init(){
+	v=0.0;
+	w=0.0;
+	wait(5);
+	turn = 1;
+	stop = 1;
+	ROS_INFO("STATE: TURN RIGTH turn=%d",turn);
+	statep=&wallfollower::state55begin;
+}
+
+void wallfollower::state55begin(){
+	ROS_INFO("STATE: TURN GOING =%d",turn);
+	if(wait()){
+		y=-90;
+		wait(60);
+		statep=&wallfollower::state55middle;
+	}
+}
+
+void wallfollower::state55middle(){
+	ROS_INFO("STATE: TURN GOING =%d",turn);
+	if(wait()){
+		y=0.0;
+		wait(5);
+		statep=&wallfollower::state55second;
+	}
+}
+
+void wallfollower::state55second(){
+	ROS_INFO("STATE: TURN GOING =%d",turn);
+	if(wait()){
+		y=-90;
+		wait(60);
+		statep=&wallfollower::state55end;
+	}
+}
+
+void wallfollower::state55end(){
+	if(wait() || !turn){
+		ROS_INFO("STATE: TURN END begin special state turn=%d",turn);
+		y=0.0;
+		statep=&wallfollower::drive1sec;
+	}
+}
+
+void wallfollower::drive1sec(){
+	v=marchSpeed;
+	wait(10);
+	statep=&wallfollower::drive1secend;
+}
+
+void wallfollower::drive1secend(){
+	if(wait()){
+		v=0.0;
+		turn = 0;
+		stop=0;
+		prevState=state;
+		state = 0b00000000;
+	}
+}
+
 void wallfollower::state4init(){
 	//ROS_INFO("STATE: GO STRAIGT");
 	v=marchSpeed;
 	w=0.0;
+	/*char tmp = currentState();
+	char rw = tmp & 0b00001010;
+	if(rw==10){
+		w = 0.005*(sensors[1].get_value() - sensors[3].get_value());
+		ROS_INFO("STATE: begin special state FOLLOW RW");
+	}*/
 	//if(state)
 }
 
@@ -267,7 +342,7 @@ void wallfollower::state5(){
 		//ROS_INFO("STATE 1: FOLLOW WALL %f",control);
 		w = control;
 	}
-	/*if(sensors[0].get_value()<160 && sensors[2].get_value()<160){
+	if(sensors[0].get_value()<160 && sensors[2].get_value()<160){
 		double ref = 170;
 		double avg=(sensors[0].get_value() + sensors[2].get_value())/2;
 		double err = ref-avg;
@@ -275,12 +350,12 @@ void wallfollower::state5(){
 		double control = -kp*err;
 		ROS_INFO("STATE 1: FOLLOW WALL %f",control);
 		w = control;
-	}*/
+	}
 }
 
 /*calculates and returns the current state*/
 char wallfollower::currentState(){
-	int registrate[] = {110,110,110,110,330,330};
+	int registrate[] = {100,100,100,100,330,330};
 	char tmp = 0b00000000;
 	int tmp2 = 1;
 	for(int i=0;i<6;i++){
@@ -300,7 +375,7 @@ void wallfollower::donothing(){
 
 /*wait for ms miliseconds*/
 int wallfollower::wait(int ms){
-	timer=ms;
+	timer=ms*hz/10;
 	//v=0.0;
 	//w=0.0;
 	//y=0.0;
@@ -334,6 +409,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	started=0;
 	change=0;
 	stop = 0;
+	hz = 50;
 	//state = 0b01000000;
 	state = 64;
 	prevState = state;
@@ -344,6 +420,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	states[1] = &wallfollower::donothing;
 	states[0] = &wallfollower::state0init;
 	states[53] = &wallfollower::state53init;
+	states[55] = &wallfollower::state55init;
 	
 	/*setup the sensor calibration*/
 	sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
