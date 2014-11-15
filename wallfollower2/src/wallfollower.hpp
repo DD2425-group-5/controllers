@@ -1,8 +1,9 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-#include "ras_arduino_msgs/ADConverter.h"
+//#include "ras_arduino_msgs/ADConverter.h"
 #include "std_msgs/Bool.h"
-#include "sensor.cpp"
+#include "ir_sensors/IRDists.h"
+//#include "sensor.cpp"
 
 
 class wallfollower {
@@ -10,7 +11,8 @@ public:
 	wallfollower(int argc, char *argv[]);
 	
 private:
-	sensor sensors[6];		//the sensors
+	//sensor sensors[6];		//the sensors
+	float sensor[6];
 	int time;				//time since the controller was started in miliseconds
 	double v;				//velocity
 	double w;				//angular turn
@@ -36,7 +38,7 @@ private:
 	ros::Subscriber sub_isTurning;// for encoder feedback
 	
 	void runNode();					//main run node
-	void sensorCallback(const ras_arduino_msgs::ADConverter msg);//for sensors
+	void sensorCallback(const ir_sensors::IRDists msg);//for sensors
 	void isTurningCallback(const std_msgs::Bool msg);	//while the motorcontroller is turning it pubs true
 	int wait();			//call to wait
 	int wait(int ms);	//set wait time in ms

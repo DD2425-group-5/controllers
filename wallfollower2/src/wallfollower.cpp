@@ -1,20 +1,24 @@
 #include "wallfollower.hpp"
 
-void wallfollower::sensorCallback(const ras_arduino_msgs::ADConverter msg){
-	int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
+void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
+	/*int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
 	for(int i=0;i<6;i++){
 		sensors[i].calculateDistance(tmp[i]);
+	}*/
+	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
+	for(int i=0;i<6;i++){
+		sensor[i]=tmp[i];
 	}
 	if(!started){
 		started=1;
 	}
-	/*ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
-	sensors[0].get_distance(),\
-	sensors[1].get_distance(),\
-	sensors[2].get_distance(),\
-	sensors[3].get_distance(),\
-	sensors[4].get_distance(),\
-	sensors[5].get_distance());*/
+	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
+	sensor[0],\
+	sensor[1],\
+	sensor[2],\
+	sensor[3],\
+	sensor[4],\
+	sensor[5]);
 	
 	/*ROS_INFO("sensor distance: 1: [%d] 2: [%d] 3: [%d] 4: [%d] 5: [%d] 6: [%d] \n\n",\
 	sensors[0].get_value(),\
@@ -167,7 +171,7 @@ void wallfollower::state0special(){
 		char tmp = currentState();
 		char rw = tmp & 0b00001010;
 		if(rw==10){
-			w = 0.005*(sensors[1].get_value() - sensors[3].get_value());
+			w = 0.005*(sensor[1] - sensor[3]);
 			ROS_INFO("STATE: begin special state FOLLOW RW");
 		}
 		tmp = tmp & 0b00000001;
@@ -319,21 +323,21 @@ void wallfollower::state4(){
 /*aligne to left wall if we have a left wall*/
 void wallfollower::state5init(){
 	v = 0.0;
-	//w = -0.005*(sensors[0].get_value() - sensors[2].get_value());
+	w = -0.005*(sensor[0] - sensor[2]);
 	//ROS_INFO("STATE: ALIGNE TO LEFT WALL");
-	//if(w < 0.1 && w > -0.1){
+	if(w < 0.1 && w > -0.1){
 		ROS_INFO("STATE: ALIGNED");
-		statep = &wallfollower::state5;
+		//statep = &wallfollower::state5;
 		w=0.0;
-	//}
+	}
 }
 
 /*follow the left wall*/
 void wallfollower::state5(){
 	v = marchSpeed;
-	w = -0.005*(sensors[0].get_value() - sensors[2].get_value());
+	w = 0.05*(sensor[0] - sensor[2]);
 	//ROS_INFO("STATE: FOLLOW WALL");
-	if(sensors[0].get_value()>180 && sensors[2].get_value()>180){
+	/*if(sensors[0].get_value()>180 && sensors[2].get_value()>180){
 		double ref = 170;
 		double avg=(sensors[0].get_value() + sensors[2].get_value())/2;
 		double err = ref-avg;
@@ -341,8 +345,8 @@ void wallfollower::state5(){
 		double control = kp*err;
 		//ROS_INFO("STATE 1: FOLLOW WALL %f",control);
 		w = control;
-	}
-	if(sensors[0].get_value()<160 && sensors[2].get_value()<160){
+	}*/
+	/*if(sensors[0].get_value()<160 && sensors[2].get_value()<160){
 		double ref = 170;
 		double avg=(sensors[0].get_value() + sensors[2].get_value())/2;
 		double err = ref-avg;
@@ -350,16 +354,16 @@ void wallfollower::state5(){
 		double control = -kp*err;
 		ROS_INFO("STATE 1: FOLLOW WALL %f",control);
 		w = control;
-	}
+	}*/
 }
 
 /*calculates and returns the current state*/
 char wallfollower::currentState(){
-	int registrate[] = {100,100,100,100,330,330};
+	int registrate[] = {30,30,30,30,20,20};
 	char tmp = 0b00000000;
 	int tmp2 = 1;
 	for(int i=0;i<6;i++){
-		if(sensors[i].get_value()>registrate[i]){
+		if(sensor[i]<registrate[i]){
 			tmp = tmp | tmp2;
 		}
 		tmp2 = tmp2 * 2;
@@ -423,7 +427,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	states[55] = &wallfollower::state55init;
 	
 	/*setup the sensor calibration*/
-	sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
+	/*sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
 		2.079, -15.55, -25.63, 871.1, 30, 4);
 	sensors[1].calibrate(0, -0.0001057, 0.01266, -0.6095, 14.97,
 		-192.1, 1198, 30, 4);
@@ -451,7 +455,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 		-3.489*std::pow(10, -5),0.0113,-1.91,161.8, 80, 20);*/
 	
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor3/twist", 1000);
-	sub_sensor = handle.subscribe("/arduino/adc", 1000, &wallfollower::sensorCallback, this);
+	sub_sensor = handle.subscribe("/ir_sensors/dists", 1000, &wallfollower::sensorCallback, this);
 	//sub_isTurning = handle.subscribe("/motor3/is_turning", 1, &wallfollower::isTurningCallback, this);
 	
 	runNode();
