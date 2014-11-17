@@ -1,4 +1,5 @@
 <launch>
+	<rosparam file="$(find wallfollower2)/config/paramswf.yaml" command="load" />
 	<include file = "$(find ir_sensors)/launch/ir_sensors.launch"/>
 	<node name="wallfollower2" pkg="wallfollower2" type="wallfollower2" output="screen" />
 	

@@ -1,10 +1,8 @@
 #include "wallfollower.hpp"
 
+//!!!!! NOTICE!! MAKE wallfollower:: into WallFollower:: for consistency!!!!
+
 void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
-	/*int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
-	for(int i=0;i<6;i++){
-		sensors[i].calculateDistance(tmp[i]);
-	}*/
 	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
 	for(int i=0;i<6;i++){
 		sensor[i]=tmp[i];
@@ -20,13 +18,6 @@ void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
 	sensor[4],\
 	sensor[5]);
 	
-	/*ROS_INFO("sensor distance: 1: [%d] 2: [%d] 3: [%d] 4: [%d] 5: [%d] 6: [%d] \n\n",\
-	sensors[0].get_value(),\
-	sensors[1].get_value(),\
-	sensors[2].get_value(),\
-	sensors[3].get_value(),\
-	sensors[4].get_value(),\
-	sensors[5].get_value());*/
 }
 
 void wallfollower::isTurningCallback(const std_msgs::Bool msg){
@@ -55,12 +46,13 @@ void wallfollower::runNode(){
 		/*work in progress*/
 		
 		if(started){
+			calculatePID();
 			//state;
 			//te
 			//state = currentState();
 			char tmp2 = currentState();
 			tmp2 = tmp2 & 0b00110011;
-			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
+			/*if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
 				prevState=state;
 				state = 0b00110011;
 				statep=&wallfollower::state55init;
@@ -77,21 +69,13 @@ void wallfollower::runNode(){
 			if(state!=tmp && !turn && state!=-128 && state != 53){
 				change++;
 				if(change==2){
-					/*char tmp2 = currentState();
-					tmp2 = tmp2 & 0b00110101;
-					if(tmp==53){
-						/*prevState=state;
-						state = 0b00110101;
-						statep=&wallfollower::state53init;
-						tmp = tmp2;
-					}*/
 					statep = states[tmp];
 					prevState = state;
 					state = tmp;
 					change=0;
 					ROS_INFO("STATE = %d",state);
 				}
-			}
+			}*/
 			(this->*statep)();
 			char front = currentState();
 			ROS_INFO("state = %d prev = %d front =%d",state,prevState,front);
@@ -109,7 +93,7 @@ void wallfollower::runNode(){
 		msg.angular.z = w;
 		
 		pub_motor.publish(msg);		//pub to motor
-		//ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
+		ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
 
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -323,38 +307,51 @@ void wallfollower::state4(){
 /*aligne to left wall if we have a left wall*/
 void wallfollower::state5init(){
 	v = 0.0;
-	w = -0.005*(sensor[0] - sensor[2]);
+	//w = -0.5*(sensor[0] - sensor[2]);
 	//ROS_INFO("STATE: ALIGNE TO LEFT WALL");
-	if(w < 0.1 && w > -0.1){
-		ROS_INFO("STATE: ALIGNED");
-		//statep = &wallfollower::state5;
+	//if(w < 0.1 && w > -0.1){
+		//ROS_INFO("STATE: ALIGNED");
+		statep = &wallfollower::state5;
 		w=0.0;
-	}
+	//}
 }
 
 /*follow the left wall*/
 void wallfollower::state5(){
 	v = marchSpeed;
-	w = 0.05*(sensor[0] - sensor[2]);
+	w = PIDcontrol_left;
+	//w = -0.05*(sensor[0] - sensor[2]);
 	//ROS_INFO("STATE: FOLLOW WALL");
-	/*if(sensors[0].get_value()>180 && sensors[2].get_value()>180){
-		double ref = 170;
-		double avg=(sensors[0].get_value() + sensors[2].get_value())/2;
-		double err = ref-avg;
-		double kp=0.005;
-		double control = kp*err;
-		//ROS_INFO("STATE 1: FOLLOW WALL %f",control);
-		w = control;
-	}*/
-	/*if(sensors[0].get_value()<160 && sensors[2].get_value()<160){
-		double ref = 170;
-		double avg=(sensors[0].get_value() + sensors[2].get_value())/2;
-		double err = ref-avg;
-		double kp=0.005;
-		double control = -kp*err;
-		ROS_INFO("STATE 1: FOLLOW WALL %f",control);
-		w = control;
-	}*/
+}
+
+void wallfollower::calculatePID(){
+	angvel_left = sensor[0] - sensor[2];
+	angvel_right = sensor[1] - sensor[3];
+	
+	// Error between target value and measured value
+	err_left = setpoint_left - angvel_left;
+	err_right = setpoint_right - angvel_right;
+	
+	// Left sensors controller
+	Pcontrol_left = GP_left*err_left;
+	Icontrol_left = Icontrol_left_prev + contr_time*GI_left*err_left; //+ (Gcontr_left/GP_left)*(
+	Dcontrol_left = (GD_left/contr_time)*(err_left - err_left_prev);
+	PIDcontrol_left = Pcontrol_left + Icontrol_left + Dcontrol_left;
+	
+	// Right sensors controller
+	Pcontrol_right = GP_right*err_right;
+	Icontrol_right = Icontrol_right_prev + contr_time*GI_right*err_right;
+	Dcontrol_right = (GD_right/contr_time)*(err_right - err_right_prev);
+	PIDcontrol_right = Pcontrol_right + Icontrol_right + Dcontrol_right;
+	
+	// Define new prev values
+	err_left_prev = err_left;
+	Icontrol_left_prev = Icontrol_left;
+	//PIDcontrol_left_prev = PIDcontrol_left;
+	
+	err_right_prev = err_right;
+	Icontrol_right_prev = Icontrol_right;
+	//PIDcontrol_right_prev = PIDcontrol_right;
 }
 
 /*calculates and returns the current state*/
@@ -418,46 +415,62 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	state = 64;
 	prevState = state;
 	//void (wallfollower::*statep)() = &wallfollower::state5init;
-	statep = &wallfollower::donothing;
+	statep = &wallfollower::state5init;
 	states[5] = &wallfollower::state5init;
-	states[4] = &wallfollower::state4init;
+	/*states[4] = &wallfollower::state4init;
 	states[1] = &wallfollower::donothing;
 	states[0] = &wallfollower::state0init;
 	states[53] = &wallfollower::state53init;
 	states[55] = &wallfollower::state55init;
+	*/
 	
-	/*setup the sensor calibration*/
-	/*sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
-		2.079, -15.55, -25.63, 871.1, 30, 4);
-	sensors[1].calibrate(0, -0.0001057, 0.01266, -0.6095, 14.97,
-		-192.1, 1198, 30, 4);
-	sensors[2].calibrate(-9.161*std::pow(10, -5), 0.008392, -0.3012,
-		5.273, -43.75, 98.26, 662, 30, 4);
-	sensors[3].calibrate(-1.215*std::pow(10, -5), 0.00113, -0.03767,
-		0.4372, 3.311, -126.2, 1069, 30, 4);
-	sensors[4].calibrate(0, -1.741*std::pow(10, -6), 0.0004776, -0.05162,
-		2.786, -78.43, 1084, 30, 4);
-	sensors[5].calibrate(0, -1.859*std::pow(10, -6), 0.0005059, -0.0542,
-		2.898, -80.75, 1096, 30, 4);
-	/*sensors[0].calibrate(7.037*std::pow(10, -14),-1.552*std::pow(10, -10),
-		1.355*std::pow(10, -7),-6.017*std::pow(10, -5),
-		0.0145,-1.864,116.8, 30, 4);
-	sensors[1].calibrate(0,-7.107*std::pow(10, -12),1.306*std::pow(10, -8),
-		-9.541*std::pow(10, -6),0.003542,-0.7071,72.41, 30, 4);
-	sensors[2].calibrate(2.878*std::pow(10, -14),-6.602*std::pow(10, -11),
-		6.098*std::pow(10, -8),-2.936*std::pow(10, -5),
-		0.007948,-1.204,94.02, 30, 4);
-	sensors[3].calibrate(0,-1.043*std::pow(10, -11),1.973*std::pow(10, -8),
-		-1.461*std::pow(10, -5),0.00536,-1.014,91.89, 30, 4);
-	sensors[4].calibrate(0,-4.235*std::pow(10, -11),7.098*std::pow(10, -8),
-		-4.627*std::pow(10, -5),0.01486,-2.45,194.6, 80, 20);
-	sensors[5].calibrate(0,-3.199*std::pow(10, -11),5.346*std::pow(10, -8),
-		-3.489*std::pow(10, -5),0.0113,-1.91,161.8, 80, 20);*/
+	states[4] = &wallfollower::state5init;
+	states[1] = &wallfollower::state5init;
+	states[0] = &wallfollower::state5init;
+	states[53] = &wallfollower::state5init;
+	states[55] = &wallfollower::state5init;
 	
+	angvel_left = 0.0;
+	angvel_right = 0.0;
+	ROSUtil::getParam(handle, "/controllerwf/GP_left", GP_left);
+	ROSUtil::getParam(handle, "/controllerwf/GI_left", GI_left);
+	ROSUtil::getParam(handle, "/controllerwf/GD_left", GD_left);
+	ROSUtil::getParam(handle, "/controllerwf/Gcontr_left", Gcontr_left);
+   	ROSUtil::getParam(handle, "/controllerwf/setpoint_left", setpoint_left);
+	ROSUtil::getParam(handle, "/controllerwf/GP_right", GP_right);
+	ROSUtil::getParam(handle, "/controllerwf/GI_right", GI_right);
+	ROSUtil::getParam(handle, "/controllerwf/GD_right", GD_right);
+	ROSUtil::getParam(handle, "/controllerwf/Gcontr_right", Gcontr_right);
+  	ROSUtil::getParam(handle, "/controllerwf/setpoint_right", setpoint_right);
+	ROSUtil::getParam(handle, "/controllerwf/contr_freq", contr_freq);
+	ROSUtil::getParam(handle, "/controllerwf/contr_time", contr_time);
+	
+	err_left = 0.0;
+	err_left_prev = 0.0;
+	err_right = 0.0;
+	err_right_prev = 0.0;
+	
+	Pcontrol_left = 0.0;
+	Icontrol_left = 0.0;
+	Dcontrol_left = 0.0;
+	Pcontrol_right = 0.0;
+	Icontrol_right = 0.0;
+	Dcontrol_right = 0.0;
+	//Pcontrol_left_prev = 0.0;
+	Icontrol_left_prev = 0.0;
+	//Dcontrol_left_prev = 0.0;
+	//Pcontrol_right_prev = 0.0;
+	Icontrol_right_prev = 0.0;
+	//Dcontrol_right_prev = 0.0;
+	PIDcontrol_left = 0.0;
+	//PIDcontrol_left_prev = 0.0;
+	PIDcontrol_right = 0.0;
+		
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor3/twist", 1000);
 	sub_sensor = handle.subscribe("/ir_sensors/dists", 1000, &wallfollower::sensorCallback, this);
 	//sub_isTurning = handle.subscribe("/motor3/is_turning", 1, &wallfollower::isTurningCallback, this);
 	
+	usleep(2000);
 	runNode();
 }
 
