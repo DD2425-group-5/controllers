@@ -1,10 +1,8 @@
 #include "wallfollower.hpp"
 
+//!!!!! NOTICE!! MAKE wallfollower:: into WallFollower:: for consistency!!!!
+
 void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
-	/*int tmp[] ={msg.ch1,msg.ch2,msg.ch3,msg.ch4,msg.ch7,msg.ch8};
-	for(int i=0;i<6;i++){
-		sensors[i].calculateDistance(tmp[i]);
-	}*/
 	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
 	for(int i=0;i<6;i++){
 		sensor[i]=tmp[i];
@@ -20,13 +18,6 @@ void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
 	sensor[4],\
 	sensor[5]);
 	
-	/*ROS_INFO("sensor distance: 1: [%d] 2: [%d] 3: [%d] 4: [%d] 5: [%d] 6: [%d] \n\n",\
-	sensors[0].get_value(),\
-	sensors[1].get_value(),\
-	sensors[2].get_value(),\
-	sensors[3].get_value(),\
-	sensors[4].get_value(),\
-	sensors[5].get_value());*/
 }
 
 void wallfollower::isTurningCallback(const std_msgs::Bool msg){
@@ -61,7 +52,7 @@ void wallfollower::runNode(){
 			//state = currentState();
 			char tmp2 = currentState();
 			tmp2 = tmp2 & 0b00110011;
-			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
+			/*if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
 				prevState=state;
 				state = 0b00110011;
 				statep=&wallfollower::state55init;
@@ -78,21 +69,13 @@ void wallfollower::runNode(){
 			if(state!=tmp && !turn && state!=-128 && state != 53){
 				change++;
 				if(change==2){
-					/*char tmp2 = currentState();
-					tmp2 = tmp2 & 0b00110101;
-					if(tmp==53){
-						/*prevState=state;
-						state = 0b00110101;
-						statep=&wallfollower::state53init;
-						tmp = tmp2;
-					}*/
 					statep = states[tmp];
 					prevState = state;
 					state = tmp;
 					change=0;
 					ROS_INFO("STATE = %d",state);
 				}
-			}
+			}*/
 			(this->*statep)();
 			char front = currentState();
 			ROS_INFO("state = %d prev = %d front =%d",state,prevState,front);
@@ -345,10 +328,6 @@ void wallfollower::calculatePID(){
 	angvel_left = sensor[0] - sensor[2];
 	angvel_right = sensor[1] - sensor[3];
 	
-	// Target values of sensors from wall
-	setpoint_left = 20.0;
-	setpoint_right = 17.0;
-	
 	// Error between target value and measured value
 	err_left = setpoint_left - angvel_left;
 	err_right = setpoint_right - angvel_right;
@@ -436,7 +415,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	state = 64;
 	prevState = state;
 	//void (wallfollower::*statep)() = &wallfollower::state5init;
-	statep = &wallfollower::donothing;
+	statep = &wallfollower::state5init;
 	states[5] = &wallfollower::state5init;
 	/*states[4] = &wallfollower::state4init;
 	states[1] = &wallfollower::donothing;
@@ -457,10 +436,12 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	ROSUtil::getParam(handle, "/controllerwf/GI_left", GI_left);
 	ROSUtil::getParam(handle, "/controllerwf/GD_left", GD_left);
 	ROSUtil::getParam(handle, "/controllerwf/Gcontr_left", Gcontr_left);
+   	ROSUtil::getParam(handle, "/controllerwf/setpoint_left", setpoint_left);
 	ROSUtil::getParam(handle, "/controllerwf/GP_right", GP_right);
 	ROSUtil::getParam(handle, "/controllerwf/GI_right", GI_right);
 	ROSUtil::getParam(handle, "/controllerwf/GD_right", GD_right);
 	ROSUtil::getParam(handle, "/controllerwf/Gcontr_right", Gcontr_right);
+  	ROSUtil::getParam(handle, "/controllerwf/setpoint_right", setpoint_right);
 	ROSUtil::getParam(handle, "/controllerwf/contr_freq", contr_freq);
 	ROSUtil::getParam(handle, "/controllerwf/contr_time", contr_time);
 	
@@ -484,35 +465,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	PIDcontrol_left = 0.0;
 	//PIDcontrol_left_prev = 0.0;
 	PIDcontrol_right = 0.0;
-	
-	/*setup the sensor calibration*/
-	/*sensors[0].calibrate(-2.575*std::pow(10, -5), 0.002731, -0.1108,
-		2.079, -15.55, -25.63, 871.1, 30, 4);
-	sensors[1].calibrate(0, -0.0001057, 0.01266, -0.6095, 14.97,
-		-192.1, 1198, 30, 4);
-	sensors[2].calibrate(-9.161*std::pow(10, -5), 0.008392, -0.3012,
-		5.273, -43.75, 98.26, 662, 30, 4);
-	sensors[3].calibrate(-1.215*std::pow(10, -5), 0.00113, -0.03767,
-		0.4372, 3.311, -126.2, 1069, 30, 4);
-	sensors[4].calibrate(0, -1.741*std::pow(10, -6), 0.0004776, -0.05162,
-		2.786, -78.43, 1084, 30, 4);
-	sensors[5].calibrate(0, -1.859*std::pow(10, -6), 0.0005059, -0.0542,
-		2.898, -80.75, 1096, 30, 4);
-	/*sensors[0].calibrate(7.037*std::pow(10, -14),-1.552*std::pow(10, -10),
-		1.355*std::pow(10, -7),-6.017*std::pow(10, -5),
-		0.0145,-1.864,116.8, 30, 4);
-	sensors[1].calibrate(0,-7.107*std::pow(10, -12),1.306*std::pow(10, -8),
-		-9.541*std::pow(10, -6),0.003542,-0.7071,72.41, 30, 4);
-	sensors[2].calibrate(2.878*std::pow(10, -14),-6.602*std::pow(10, -11),
-		6.098*std::pow(10, -8),-2.936*std::pow(10, -5),
-		0.007948,-1.204,94.02, 30, 4);
-	sensors[3].calibrate(0,-1.043*std::pow(10, -11),1.973*std::pow(10, -8),
-		-1.461*std::pow(10, -5),0.00536,-1.014,91.89, 30, 4);
-	sensors[4].calibrate(0,-4.235*std::pow(10, -11),7.098*std::pow(10, -8),
-		-4.627*std::pow(10, -5),0.01486,-2.45,194.6, 80, 20);
-	sensors[5].calibrate(0,-3.199*std::pow(10, -11),5.346*std::pow(10, -8),
-		-3.489*std::pow(10, -5),0.0113,-1.91,161.8, 80, 20);*/
-	
+		
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor3/twist", 1000);
 	sub_sensor = handle.subscribe("/ir_sensors/dists", 1000, &wallfollower::sensorCallback, this);
 	//sub_isTurning = handle.subscribe("/motor3/is_turning", 1, &wallfollower::isTurningCallback, this);

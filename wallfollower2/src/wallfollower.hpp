@@ -96,11 +96,11 @@ private:
 	double GI_left;
 	double GD_left;
 	double Gcontr_left;
+	double setpoint_left;
 	double GP_right;
 	double GI_right;
 	double GD_right;
 	double Gcontr_right;
-	double setpoint_left;
 	double setpoint_right;
 	double angvel_left;
 	double angvel_right;

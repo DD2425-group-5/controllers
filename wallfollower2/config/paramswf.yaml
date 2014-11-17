@@ -1,14 +1,16 @@
 controllerwf: {
-GP_left: 1.0,
+GP_left: 10,
 GI_left: 0.0,
 GD_left: 0.0,
-
 Gcontr_left: 0.0,
+setpoint_left: 0.0,
+
 GP_right: 0.0,
 GI_right: 0.0,
 GD_right: 0.0,
-
 Gcontr_right: 0.0,
+setpoint_right: -2.3,
+
 contr_time: 0.1,
 contr_freq: 10.0
 }
