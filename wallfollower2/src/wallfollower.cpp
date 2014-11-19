@@ -39,7 +39,7 @@ void wallfollower::isTurningCallback(const std_msgs::Bool msg){
 }
 
 void wallfollower::runNode(){
-	ros::Rate loop_rate(hz);	//10 Hz
+	ros::Rate loop_rate(hz);	//50 Hz
 	wait(5);
 	while (ros::ok())			//main loop of this code
 	{
@@ -335,6 +335,7 @@ void wallfollower::calculatePID(){
 	// Left sensors controller
 	Pcontrol_left = GP_left*err_left;
 	Icontrol_left = Icontrol_left_prev + contr_time*GI_left*err_left; //+ (Gcontr_left/GP_left)*(
+    ROS_INFO("Icontrol_left = %f", Icontrol_left);
 	Dcontrol_left = (GD_left/contr_time)*(err_left - err_left_prev);
 	PIDcontrol_left = Pcontrol_left + Icontrol_left + Dcontrol_left;
 	
