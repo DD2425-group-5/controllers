@@ -7,17 +7,16 @@ void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
 	for(int i=0;i<6;i++){
 		sensor[i]=tmp[i];
 	}
-	if(!started){
+	if(!started && tmp[0]>0){
 		started=1;
 	}
-	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
+	/*ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
 	sensor[0],\
 	sensor[1],\
 	sensor[2],\
 	sensor[3],\
 	sensor[4],\
-	sensor[5]);
-	
+	sensor[5]);*/
 }
 
 void wallfollower::isTurningCallback(const std_msgs::Bool msg){
@@ -47,6 +46,7 @@ void wallfollower::runNode(){
 		
 		if(started){
 			calculatePID();
+			//pubTurn(90.0);
 			//state;
 			//te
 			//state = currentState();
@@ -88,12 +88,16 @@ void wallfollower::runNode(){
 		
 		geometry_msgs::Twist msg;	//for controlling the motor
 		
-		msg.linear.x = v;
+		/*msg.linear.x = v;
 		msg.angular.y = y;
-		msg.angular.z = w;
+		msg.angular.z = w;*/
+		
+		msg.linear.x = 0.0;
+		msg.angular.y = 0.0;
+		msg.angular.z = 0.0;
 		
 		pub_motor.publish(msg);		//pub to motor
-		ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
+		//ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
 
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -101,7 +105,7 @@ void wallfollower::runNode(){
 }
 
 void wallfollower::state0init(){
-	//ROS_INFO("STATE: TURN");
+	ROS_INFO("STATE: TURN");
 	v=0.0;
 	w=0.0;
 	//y=90.0;
@@ -109,9 +113,11 @@ void wallfollower::state0init(){
 	wait(5);
 	if(prevState & 0b00000101){
 		turn = 1;
+		pubTurn(90.0);
 		statep=&wallfollower::state0begin;
 	}
 	else if(prevState==-128){
+		pubTurn(90.0);
 		statep=&wallfollower::state0begin;
 	}
 	else{
@@ -143,6 +149,7 @@ void wallfollower::state0end(){
 		statep=&wallfollower::state0special;
 		prevState=state;
 		state=0b10000000;
+		pubTurn(0);
 		ROS_INFO("STATE = %d",state);
 	}
 }
@@ -203,6 +210,7 @@ void wallfollower::state53init(){
 	turn = 1;
 	stop = 1;
 	ROS_INFO("STATE: TURN RIGTH turn=%d",turn);
+	pubTurn(-90.0);
 	statep=&wallfollower::state53begin;
 }
 
@@ -233,6 +241,7 @@ void wallfollower::state55init(){
 	turn = 1;
 	stop = 1;
 	ROS_INFO("STATE: TURN RIGTH turn=%d",turn);
+	pubTurn(180);
 	statep=&wallfollower::state55begin;
 }
 
@@ -240,7 +249,7 @@ void wallfollower::state55begin(){
 	ROS_INFO("STATE: TURN GOING =%d",turn);
 	if(wait()){
 		y=-90;
-		wait(60);
+		wait(30);
 		statep=&wallfollower::state55middle;
 	}
 }
@@ -258,7 +267,7 @@ void wallfollower::state55second(){
 	ROS_INFO("STATE: TURN GOING =%d",turn);
 	if(wait()){
 		y=-90;
-		wait(60);
+		wait(30);
 		statep=&wallfollower::state55end;
 	}
 }
@@ -267,6 +276,7 @@ void wallfollower::state55end(){
 	if(wait() || !turn){
 		ROS_INFO("STATE: TURN END begin special state turn=%d",turn);
 		y=0.0;
+		pubTurn(0);
 		statep=&wallfollower::drive1sec;
 	}
 }
@@ -369,6 +379,20 @@ char wallfollower::currentState(){
 	//ROS_INFO("state = %d", tmp);
 }
 
+/*this function publish a message the the turn have ended if degrees is 0 otherwise 
+	that the turn have just begun*/
+void wallfollower::pubTurn(float degrees){
+	controller_msgs::Turning msg;
+	if(degrees == 0){
+		msg.isTurning = false;
+	}
+	else{
+		msg.isTurning = true;
+	}
+	msg.degrees = degrees;
+	pub_turning.publish(msg);
+}
+
 void wallfollower::donothing(){
 	//guess what this does
 	//ROS_INFO("STATE: DO NOTHING");
@@ -416,8 +440,8 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	prevState = state;
 	//void (wallfollower::*statep)() = &wallfollower::state5init;
 	statep = &wallfollower::state5init;
-	states[5] = &wallfollower::state5init;
-	/*states[4] = &wallfollower::state4init;
+	/*states[5] = &wallfollower::state5init;
+	states[4] = &wallfollower::state4init;
 	states[1] = &wallfollower::donothing;
 	states[0] = &wallfollower::state0init;
 	states[53] = &wallfollower::state53init;
@@ -429,6 +453,8 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	states[0] = &wallfollower::state5init;
 	states[53] = &wallfollower::state5init;
 	states[55] = &wallfollower::state5init;
+	
+	//statep = &wallfollower::state0init;
 	
 	angvel_left = 0.0;
 	angvel_right = 0.0;
@@ -468,6 +494,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 		
 	pub_motor = handle.advertise<geometry_msgs::Twist>("/motor3/twist", 1000);
 	sub_sensor = handle.subscribe("/ir_sensors/dists", 1000, &wallfollower::sensorCallback, this);
+	pub_turning = handle.advertise<controller_msgs::Turning>("/controller/turn", 1000);
 	//sub_isTurning = handle.subscribe("/motor3/is_turning", 1, &wallfollower::isTurningCallback, this);
 	
 	usleep(2000);

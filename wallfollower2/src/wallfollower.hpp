@@ -7,6 +7,7 @@
 #include <math.h>
 #include <sstream>
 #include <unistd.h>
+#include "controller_msgs/Turning.h"
 //#include "sensor.cpp"
 
 
@@ -40,6 +41,7 @@ private:
 	ros::Subscriber sub_sensor;	//sub to get distance values
 	ros::Publisher pub_motor;	//for the motor
 	ros::Subscriber sub_isTurning;// for encoder feedback
+	ros::Publisher pub_turning; //for publishing when turning
 	
 	void runNode();					//main run node
 	void sensorCallback(const ir_sensors::IRDists msg);//for sensors
@@ -71,6 +73,7 @@ private:
 	void drive1sec();
 	void drive1secend();
 	void calculatePID();
+	void pubTurn(float degrees); //publish turn as rostopic
 	
 	double err_left;
 	double err_left_prev;
