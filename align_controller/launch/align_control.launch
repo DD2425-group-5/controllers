@@ -1,0 +1,10 @@
+<launch>
+  
+  <rosparam file="$(find align_controller)/config/params.yaml" command="load" />
+  <rosparam file="$(find project_launch)/config/global_params.yaml" command="load" />
+  <rosparam file="$(find project_launch)/config/topic_names.yaml" command="load" />
+  <node name="align_controller" pkg="align_controller" type="align_controller" output="screen"/>
+  <!--node name="align_controller" pkg="align_controller" type="align_controller" output="screen"/-->
+ 
+    
+</launch>

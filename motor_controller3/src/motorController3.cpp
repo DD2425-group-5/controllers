@@ -55,9 +55,9 @@ MotorController3::MotorController3(int argc, char *argv[]){
     ROS_INFO("START DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  \
     setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
     setpoint_wL=0.0;
-    feedback_dL=0.0;
+    feedback_wL=0.0;
     setpoint_wR=0.0;
-    feedback_dR=0.0;
+    feedback_wR=0.0;
 	ROS_INFO("AFTER DEBUG: L: Setpoint:%f,Feedback:%f,  R:Setpoint:%f,Feedback:%f",  \
     setpoint_wL,feedback_wL, setpoint_wR, feedback_wR);
 	while (ros::ok()){
@@ -243,16 +243,16 @@ void MotorController3::runNodePrecisionTurn(){
 
 			//  CHEAT###
 			if (control_R_preSat <0.00001){
-				control_R_preSat-=36;
+				control_R_preSat-=39;
 			} else {
-				control_R_preSat+=36;
+				control_R_preSat+=39;
 			}
 				//ADD 0 cheat for 0?
 
 			if (control_L_preSat <0.00001){
-				control_L_preSat-=36;
+				control_L_preSat-=39;
 			} else {
-				control_L_preSat+=36;
+				control_L_preSat+=39;
 			}
 			// ###/CHEAT
 			
@@ -279,7 +279,7 @@ void MotorController3::runNodePrecisionTurn(){
 				control.PWM1 = control_R_preSat;
 			}
 
-			if ((abs(err_R) <7)){
+			if ((fabs(err_R) <7)){
                 turnIsReadyR = true;
 			    control.PWM1 = 0;
 			}
@@ -297,7 +297,7 @@ void MotorController3::runNodePrecisionTurn(){
 				control.PWM2 = control_L_preSat;
 			}
 
-		    if ((abs(err_L) <7)){ 
+		    if ((fabs(err_L) <7)){ 
                 turnIsReadyL = true;              
                 control.PWM2 = 0;
 			}

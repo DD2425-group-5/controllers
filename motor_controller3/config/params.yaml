@@ -28,7 +28,7 @@ controller_turn_old: { #_old
   satMax: 150.0
 }
 
-controller_turn_save50: { #_new
+controller_turn_save50: { #_newsave50
   Gp_R: 0.15,
   Gp_L: 0.15,
   Gi_R: 0.02,
@@ -42,7 +42,7 @@ controller_turn_save50: { #_new
   satMax: 150.0
 }
 
-controller_turn: { #_new_lowBATT
+controller_turn_low_batt: { #_new_lowBATT
   Gp_R: 0.19,
   Gp_L: 0.21,
   Gi_R: 0.019,
@@ -51,6 +51,21 @@ controller_turn: { #_new_lowBATT
   Gd_L: 0.032,
   Gc_R: 0.0,
   Gc_L: 0.0,
+  
+  satMin: 0.1,
+  satMax: 150.0
+}
+
+
+controller_turn: { #_new_fast
+  Gp_R: 0.20,
+  Gp_L: 0.33,
+  Gi_R: 0.2,
+  Gi_L: 0.25,
+  Gd_R: 0.1,
+  Gd_L: 0.1,
+  Gc_R: -0.15,
+  Gc_L: -0.1,
   
   satMin: 0.1,
   satMax: 150.0
