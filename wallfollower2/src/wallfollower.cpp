@@ -52,7 +52,7 @@ void wallfollower::runNode(){
 			//state = currentState();
 			char tmp2 = currentState();
 			tmp2 = tmp2 & 0b00110011;
-			/*if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
+			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
 				prevState=state;
 				state = 0b00110011;
 				statep=&wallfollower::state55init;
@@ -75,7 +75,7 @@ void wallfollower::runNode(){
 					change=0;
 					ROS_INFO("STATE = %d",state);
 				}
-			}*/
+			}
 			(this->*statep)();
 			char front = currentState();
 			ROS_INFO("state = %d prev = %d front =%d",state,prevState,front);
@@ -90,11 +90,12 @@ void wallfollower::runNode(){
 		
 		/*msg.linear.x = v;
 		msg.angular.y = y;
-		msg.angular.z = w;*/
-		
+		msg.angular.z = w;
+		*/
 		msg.linear.x = 0.0;
 		msg.angular.y = 0.0;
 		msg.angular.z = 0.0;
+		
 		
 		pub_motor.publish(msg);		//pub to motor
 		//ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
@@ -366,11 +367,11 @@ void wallfollower::calculatePID(){
 
 /*calculates and returns the current state*/
 char wallfollower::currentState(){
-	int registrate[] = {30,30,30,30,20,20};
+	float registrate[] = {0.3,0.3,0.3,0.3,0.2,0.2};
 	char tmp = 0b00000000;
 	int tmp2 = 1;
 	for(int i=0;i<6;i++){
-		if(sensor[i]<registrate[i]){
+		if(sensor[i] < registrate[i]){
 			tmp = tmp | tmp2;
 		}
 		tmp2 = tmp2 * 2;
@@ -440,20 +441,20 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	prevState = state;
 	//void (wallfollower::*statep)() = &wallfollower::state5init;
 	statep = &wallfollower::state5init;
-	/*states[5] = &wallfollower::state5init;
+	states[5] = &wallfollower::state5init;
 	states[4] = &wallfollower::state4init;
 	states[1] = &wallfollower::donothing;
 	states[0] = &wallfollower::state0init;
 	states[53] = &wallfollower::state53init;
 	states[55] = &wallfollower::state55init;
-	*/
 	
-	states[4] = &wallfollower::state5init;
+	
+	/*states[4] = &wallfollower::state5init;
 	states[1] = &wallfollower::state5init;
 	states[0] = &wallfollower::state5init;
 	states[53] = &wallfollower::state5init;
 	states[55] = &wallfollower::state5init;
-	
+	*/
 	//statep = &wallfollower::state0init;
 	
 	angvel_left = 0.0;
