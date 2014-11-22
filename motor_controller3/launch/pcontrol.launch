@@ -3,7 +3,7 @@
   <rosparam file="$(find motor_controller3)/config/params.yaml" command="load" />
   <rosparam file="$(find project_launch)/config/global_params.yaml" command="load" />
   <rosparam file="$(find project_launch)/config/topic_names.yaml" command="load" />
-  <node name="motor_controller3" pkg="motor_controller3" type="motor_controller3" output="screen"/>
+  <node name="motor_controller3" pkg="motor_controller3" type="motor_controller3" />
   <!--node name="motor_controller3" pkg="motor_controller3" type="motor_controller3" output="screen" /-->
  
     

@@ -62,8 +62,8 @@ AlignController::AlignController(int argc, char *argv[]){
 void AlignController::irSensorCallback(const ir_sensors::IRDists msg){
 	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
 	for(int i=0;i<6;i++){
-	    if(tmp[i]>=30){
-	        sensor[i] = 30;
+	    if(tmp[i]>=0.29){
+	        sensor[i] = 0.29;
 	        }
 	    else{	    
 		    sensor[i]=tmp[i];
@@ -84,7 +84,7 @@ void AlignController::setpointCallback( geometry_msgs::Twist setpoint)
     correction_L = setpoint.linear.y;
     correction_R = setpoint.linear.z;
     
-	if (fabs(correction_L)>20 || fabs(correction_R)>20 ){ //centimeters
+	if (fabs(correction_L)>0.20 || fabs(correction_R)>0.20 ){ //meters
 		ROS_INFO("ATTENTION!: CorrectionL=[%f], CorrectionR=[%f] F O R C E D to 0!!!",correction_L,correction_R);
 		correction_L= 0.0;
 		correction_R= 0.0;
@@ -159,6 +159,22 @@ void AlignController::runNodeAlignTurn(){
 			err_L= correction_R - feedback_R;
 			err_R= correction_L - feedback_L;
 			
+			if (err_L>0.1){
+			    err_L = 0.1;
+			}
+			if (err_L<-0.1){
+			    err_L = -0.1;
+			}
+			
+			
+			if (err_R>0.1){
+			    err_R = 0.1;
+			}
+			if (err_R<-0.1){
+			    err_R = -0.1;
+			}
+			
+			
             if(wallToAlignTo == Left){
                         ROS_INFO("ALINGING TO LEFT WALL WITH ERR = %f", err_R);
 			            //controller Right wheel (PWM1), INCL Antiwindup
@@ -174,10 +190,11 @@ void AlignController::runNodeAlignTurn(){
 			            control_OLD_R_preSat = control_R_preSat;
 
                         ROS_INFO("control_i_R = %f", control_i_R);
-
+                        ROS_INFO("control_p_R = %f", control_p_R);
+                        
                         //  CHEAT###
                			if (control_R_preSat <0.00001){
-				            control_R_preSat-=40;
+				            control_R_preSat-=42;
 			            } else {
 				            control_R_preSat+=40;
 			            }
@@ -206,7 +223,7 @@ void AlignController::runNodeAlignTurn(){
 				            control.PWM1 = control_R_preSat;
 			            }
 
-			            if ((fabs(err_R) <2)){
+			            if ((fabs(err_R) <0.02)){
                             alignIsReadyR = true;
 			                control.PWM1 = 0;
 			            }
@@ -246,9 +263,9 @@ void AlignController::runNodeAlignTurn(){
 				            //ADD 0 cheat for 0?
 
 			            if (control_L_preSat <0.00001){
-				            control_L_preSat-=39;
+				            control_L_preSat-=41;
 			            } else {
-				            control_L_preSat+=39;
+				            control_L_preSat+=42;
 			            }
 			            // ###/CHEAT
 			
@@ -273,7 +290,7 @@ void AlignController::runNodeAlignTurn(){
 				            control.PWM2 = control_L_preSat;
 			            }
 
-		                if ((fabs(err_L) <2)){ 
+		                if ((fabs(err_L) <0.02)){ 
                             alignIsReadyL = true;              
                             control.PWM2 = 0;
 			            }

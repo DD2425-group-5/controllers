@@ -1,14 +1,14 @@
 align_controller: {
-  Gp_R: 2.0,
-  Gp_L: 2.0,
-  Gi_R: 0.2,
-  Gi_L: 0.2,
+  Gp_R: 300.0,
+  Gp_L: 300.0,
+  Gi_R: 200.0,
+  Gi_L: 200.0,
   Gd_R: 0.0,
   Gd_L: 0.0,
   Gc_R: 0.0,
   Gc_L: 0.0,
-  control_freq: 10,
-  control_time: 0.1,
+  control_freq: 50,
+  control_time: 0.02,
   satMin: 0.01,
   satMax: 150.0
 }

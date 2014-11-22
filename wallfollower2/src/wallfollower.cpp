@@ -53,6 +53,7 @@ void wallfollower::runNode(){
 			//state;
 			//te
 			//state = currentState();
+			/*
 			char tmp2 = currentState();
 			tmp2 = tmp2 & 0b00110011;
 			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
@@ -78,7 +79,7 @@ void wallfollower::runNode(){
 					change=0;
 					ROS_INFO("STATE = %d",state);
 				}
-			}
+			}*/
 			(this->*statep)();
 			char front = currentState();
 			ROS_INFO("state = %d prev = %d front =%d",state,prevState,front);
@@ -91,14 +92,14 @@ void wallfollower::runNode(){
 		
 		geometry_msgs::Twist msg;	//for controlling the motor
 		
-		/*msg.linear.x = v;
+		msg.linear.x = v;
 		msg.angular.y = y;
 		msg.angular.z = w;
-		*/
-		msg.linear.x = 0.0;
+		
+		/*msg.linear.x = 0.0;
 		msg.angular.y = 0.0;
 		msg.angular.z = 0.0;
-		
+		*/
 		
 		pub_motor.publish(msg);		//pub to motor
 
@@ -493,6 +494,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	prevState = state;
 	//void (wallfollower::*statep)() = &wallfollower::state5init;
 	statep = &wallfollower::state5init;
+	
 	states[5] = &wallfollower::state5init;
 	states[4] = &wallfollower::state4init;
 	states[1] = &wallfollower::donothing;
@@ -500,13 +502,13 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	states[53] = &wallfollower::state53init;
 	states[55] = &wallfollower::state55init;
 	
-	
-	/*states[4] = &wallfollower::state5init;
+	//CHEAT EVERYTHING IS WALLFOLLOW
+	states[4] = &wallfollower::state5init;
 	states[1] = &wallfollower::state5init;
 	states[0] = &wallfollower::state5init;
 	states[53] = &wallfollower::state5init;
 	states[55] = &wallfollower::state5init;
-	*/
+	
 	//statep = &wallfollower::state0init;
 	
 	angvel_left = 0.0;
