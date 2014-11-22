@@ -16,7 +16,10 @@ void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
 	sensor[2],\
 	sensor[3],\
 	sensor[4],\
-	sensor[5]);*/
+
+	sensor[5]);
+	*/
+
 }
 
 void wallfollower::isTurningCallback(const std_msgs::Bool msg){
@@ -98,7 +101,9 @@ void wallfollower::runNode(){
 		
 		
 		pub_motor.publish(msg);		//pub to motor
-		//ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d", msg.angular.z,v,y,turn);
+
+		ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d\n\n\n", msg.angular.z,v,y,turn);
+
 
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -336,8 +341,53 @@ void wallfollower::state5(){
 }
 
 void wallfollower::calculatePID(){
-	angvel_left = sensor[0] - sensor[2];
-	angvel_right = sensor[1] - sensor[3];
+    float FL = 0.0;
+    float RL = 0.0;
+    
+    float FR = 0.0;
+    float RR = 0.0;
+    
+    if(sensor[0]>0.3){
+        FL = 0.3;
+    }
+    else{ 
+        FL = sensor[0];
+    }
+    
+     if(sensor[1]>0.3){
+        FR = 0.3;
+    }
+    else{ 
+        FR = sensor[1];
+    }
+    
+     if(sensor[2]>0.3){
+        RL = 0.3;
+    }
+    else{ 
+        RL = sensor[2];
+    }
+    
+    
+     if(sensor[3]>0.3){
+        RR = 0.3;
+    }
+    else{ 
+        RR = sensor[3];
+    }
+    
+    
+    
+	angvel_left = FL - RL;
+	angvel_right = FR - RR;
+	
+	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
+	sensor[0],\
+	sensor[1],\
+	sensor[2],\
+	sensor[3],\
+	sensor[4],\
+	sensor[5]);
 	
 	// Error between target value and measured value
 	err_left = setpoint_left - angvel_left;
@@ -367,7 +417,9 @@ void wallfollower::calculatePID(){
 
 /*calculates and returns the current state*/
 char wallfollower::currentState(){
-	float registrate[] = {0.3,0.3,0.3,0.3,0.2,0.2};
+
+	float registrate[] = {0.30,0.30,0.30,0.30,0.20,0.20};
+
 	char tmp = 0b00000000;
 	int tmp2 = 1;
 	for(int i=0;i<6;i++){
