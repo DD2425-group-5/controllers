@@ -53,7 +53,7 @@ void wallfollower::runNode(){
 			//state;
 			//te
 			//state = currentState();
-			/*
+			
 			char tmp2 = currentState();
 			tmp2 = tmp2 & 0b00110011;
 			if((tmp2 == 51 || tmp2 == 19 || tmp2 == 35) && !stop && !turn){
@@ -79,7 +79,7 @@ void wallfollower::runNode(){
 					change=0;
 					ROS_INFO("STATE = %d",state);
 				}
-			}*/
+			}
 			(this->*statep)();
 			char front = currentState();
 			ROS_INFO("state = %d prev = %d front =%d",state,prevState,front);
@@ -103,7 +103,7 @@ void wallfollower::runNode(){
 		
 		pub_motor.publish(msg);		//pub to motor
 
-		ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d\n\n\n", msg.angular.z,v,y,turn);
+		//ROS_INFO(" msg.angular.z = %f v=%f y=%f turn=%d\n\n\n", msg.angular.z,v,y,turn);
 
 
 		ros::spinOnce();
@@ -167,11 +167,11 @@ void wallfollower::state0special(){
 		v=marchSpeed;
 		w=0.0;
 		char tmp = currentState();
-		char rw = tmp & 0b00001010;
+		/*char rw = tmp & 0b00001010;
 		if(rw==10){
 			w = 0.005*(sensor[1] - sensor[3]);
 			ROS_INFO("STATE: begin special state FOLLOW RW");
-		}
+		}*/
 		tmp = tmp & 0b00000001;
 		if(tmp){
 			w=0.0;
@@ -419,7 +419,7 @@ void wallfollower::calculatePID(){
 /*calculates and returns the current state*/
 char wallfollower::currentState(){
 
-	float registrate[] = {0.30,0.30,0.30,0.30,0.20,0.20};
+	float registrate[] = {0.30,0.30,0.30,0.30,0.15,0.15};
 
 	char tmp = 0b00000000;
 	int tmp2 = 1;
@@ -481,7 +481,7 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	v = 0.0;
 	w = 0.0;
 	y = 0.0;
-	marchSpeed = 0.2;
+	marchSpeed = 0.25;
 	turn = 0;
 	timeNoTurn=0;
 	timer=0;
@@ -503,12 +503,12 @@ wallfollower::wallfollower(int argc, char *argv[]){
 	states[55] = &wallfollower::state55init;
 	
 	//CHEAT EVERYTHING IS WALLFOLLOW
-	states[4] = &wallfollower::state5init;
+	/*states[4] = &wallfollower::state5init;
 	states[1] = &wallfollower::state5init;
 	states[0] = &wallfollower::state5init;
 	states[53] = &wallfollower::state5init;
 	states[55] = &wallfollower::state5init;
-	
+	*/
 	//statep = &wallfollower::state0init;
 	
 	angvel_left = 0.0;
