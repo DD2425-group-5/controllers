@@ -236,6 +236,7 @@ void wallfollower::state53end(){
 		y=0.0;
 		turn = 0;
 		stop=0;
+		pubTurn(0);
 		prevState=state;
 		state = 0b00000000;
 	}
