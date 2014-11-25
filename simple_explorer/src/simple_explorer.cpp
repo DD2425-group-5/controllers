@@ -9,7 +9,7 @@ void simple_explorer::runNode(){
 		if(started){
 			char tmp = currentState();	
 			char tmpState=action(tmp);	//what action shoul be taken given the sensor data
-			//ROS_INFO("STATE = %d TMPSTATE = %d", state,tmpState);
+			ROS_INFO("STATE = %d TMPSTATE = %d stop = %d", state,tmpState,stop);
 			if(tmpState!=state && !stop){		//has the state changed?
 				prevState=state;
 				state=tmpState;
@@ -25,7 +25,7 @@ void simple_explorer::runNode(){
 		msg.angular.y = y;
 		msg.angular.z = w;
 		
-		msg.linear.x = 0.0;
+		/*msg.linear.x = 0.0;
 		msg.angular.y = 0.0;
 		msg.angular.z = 0.0;
 		/**/
@@ -44,7 +44,7 @@ char simple_explorer::action(char state){
 	if(tmp>0){ //are there any obstacle in the way
 		//return DONOTHING;
 		tmp = state & 0b00000101;
-		stop = 1;	//stop state update
+		//stop = 1;	//stop state update
 		if(tmp==0){
 			return TURN_LEFT;
 		}
@@ -65,6 +65,7 @@ char simple_explorer::action(char state){
 
 void simple_explorer::followrightwallinit(){
 	statep=&simple_explorer::followrightwall;
+	//stop = 0;
 }
 
 void simple_explorer::followrightwall(){
@@ -84,6 +85,7 @@ void simple_explorer::followleftwall(){
 void simple_explorer::turnleftinit(){
 	v = 0.0;
 	w = 0.0;
+	stop = 1;
 	wait(5);
 	statep=&simple_explorer::turnleftstart;
 }
@@ -106,6 +108,7 @@ void simple_explorer::turnleftend(){
 void simple_explorer::turnrightinit(){
 	v = 0.0;
 	w = 0.0;
+	stop = 1;
 	wait(5);
 	statep=&simple_explorer::turnrightstart;
 }
@@ -225,8 +228,8 @@ simple_explorer::simple_explorer(int argc, char *argv[]){
 	states[DONOTHING] = &simple_explorer::donothing;
 	states[FOLLOW_LEFT_WALL] = &simple_explorer::followleftwallinit;
 	states[FOLLOW_RIGHT_WALL] = &simple_explorer::followrightwallinit;
-	states[TURN_LEFT] = &simple_explorer::donothing;
-	states[TURN_RIGHT] = &simple_explorer::donothing;
+	states[TURN_LEFT] = &simple_explorer::turnleftinit;
+	states[TURN_RIGHT] = &simple_explorer::turnrightinit;
 	state = DONOTHING;
 	prevState = DONOTHING;
 	statep = &simple_explorer::donothing;
