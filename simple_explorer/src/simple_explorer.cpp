@@ -10,7 +10,7 @@ void simple_explorer::runNode(){
 			char tmp = currentState();	
 			char tmpState=action(tmp);	//what action shoul be taken given the sensor data
 			//ROS_INFO("STATE = %d TMPSTATE = %d", state,tmpState);
-			if(tmpState!=state){		//has the state changed?
+			if(tmpState!=state && !stop){		//has the state changed?
 				prevState=state;
 				state=tmpState;
 				ROS_INFO("STATE = %d", state);
@@ -43,6 +43,14 @@ char simple_explorer::action(char state){
 	tmp = state & 0b00110000;	//apply front masking
 	if(tmp>0){ //are there any obstacle in the way
 		//return DONOTHING;
+		tmp = state & 0b00000101;
+		stop = 1;	//stop state update
+		if(tmp==0){
+			return TURN_LEFT;
+		}
+		else{
+			return TURN_RIGHT;
+		}
 	}
 	tmp = state & 0b00000101;	//apply lw masking
 	if(5==tmp){ //do we have a wall on the left
@@ -60,7 +68,8 @@ void simple_explorer::followrightwallinit(){
 }
 
 void simple_explorer::followrightwall(){
-
+	v = marchSpeed;
+	w = 0.005*(sensor[1]-sensor[3]);
 }
 
 void simple_explorer::followleftwallinit(){
@@ -68,7 +77,52 @@ void simple_explorer::followleftwallinit(){
 }
 
 void simple_explorer::followleftwall(){
-	
+	v = marchSpeed;
+	w = -0.005*(sensor[0]-sensor[2]);
+}
+
+void simple_explorer::turnleftinit(){
+	v = 0.0;
+	w = 0.0;
+	wait(5);
+	statep=&simple_explorer::turnleftstart;
+}
+
+void simple_explorer::turnleftstart(){
+	if(wait()){
+		y = 90;
+		wait(30);
+		statep=&simple_explorer::turnleftend;
+	}
+}
+
+void simple_explorer::turnleftend(){
+	if(wait()){
+		y = 0.0;
+		stop = 0;
+	}
+}
+
+void simple_explorer::turnrightinit(){
+	v = 0.0;
+	w = 0.0;
+	wait(5);
+	statep=&simple_explorer::turnrightstart;
+}
+
+void simple_explorer::turnrightstart(){
+	if(wait()){
+		y = -90;
+		wait(30);
+		statep=&simple_explorer::turnrightend;
+	}
+}
+
+void simple_explorer::turnrightend(){
+	if(wait()){
+		y = 0.0;
+		stop = 0;
+	}
 }
 
 void simple_explorer::donothing(){

@@ -53,4 +53,12 @@ private:
 	void followleftwall();
 	void followrightwallinit();
 	void followrightwall();
+	
+	void turnleftinit();
+	void turnleftstart();
+	void turnleftend();
+	
+	void turnrightinit();
+	void turnrightstart();
+	void turnrightend();
 };
