@@ -48,7 +48,7 @@ void wallfollower::runNode(){
 		/*work in progress*/
 		
 		if(started){
-			calculatePID();
+			//calculatePID();   // I-CONTROLLER DOES NOT EXECUTE WELL IF YOU DO IT THIS WAY - IT ACCUMULATES!
 			//pubTurn(90.0);
 			//state;
 			//te
@@ -307,7 +307,8 @@ void wallfollower::drive1secend(){
 
 void wallfollower::state4init(){
 	//ROS_INFO("STATE: GO STRAIGT");
-	v=marchSpeed;
+	//v=marchSpeed;
+    v = 0.0;
 	w=0.0;
 	/*char tmp = currentState();
 	char rw = tmp & 0b00001010;
@@ -336,10 +337,12 @@ void wallfollower::state5init(){
 
 /*follow the left wall*/
 void wallfollower::state5(){
-	v = marchSpeed;
+	calculatePID();
+    v = 0;
+    //v = marchSpeed;
 	w = PIDcontrol_left;
-	//w = -0.05*(sensor[0] - sensor[2]);
-	//ROS_INFO("STATE: FOLLOW WALL");
+    ROS_INFO("STATE: FOLLOW WALL");
+    ROS_INFO("w = %f", w);
 }
 
 void wallfollower::calculatePID(){
@@ -382,6 +385,7 @@ void wallfollower::calculatePID(){
     
 	angvel_left = FL - RL;
 	angvel_right = FR - RR;
+    ROS_INFO("angvel_left = %f", angvel_left);
 	
 	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
 	sensor[0],\
@@ -415,6 +419,7 @@ void wallfollower::calculatePID(){
 	err_right_prev = err_right;
 	Icontrol_right_prev = Icontrol_right;
 	//PIDcontrol_right_prev = PIDcontrol_right;
+
 }
 
 /*calculates and returns the current state*/

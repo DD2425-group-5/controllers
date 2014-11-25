@@ -61,4 +61,46 @@ private:
 	void turnrightinit();
 	void turnrightstart();
 	void turnrightend();
+
+    void calculatePID();
+
+    double err_left;
+	double err_left_prev;
+	double err_right;
+	double err_right_prev;
+	double Pcontrol_left;
+	double Icontrol_left;
+	double Dcontrol_left;
+	double Pcontrol_right;
+	double Icontrol_right;
+	double Dcontrol_right;
+	//double Pcontrol_left_prev = 0.0;
+	double Icontrol_left_prev;
+	//double Dcontrol_left_prev = 0.0;
+	//double Pcontrol_right_prev = 0.0;
+	double Icontrol_right_prev;
+	//double Dcontrol_right_prev = 0.0;
+	double PIDcontrol_left;
+	//double PIDcontrol_left_prev = 0.0;
+	double PIDcontrol_right;
+	
+	double GP_left;
+	double GI_left;
+	double GD_left;
+	double Gcontr_left;
+	double setpoint_left;
+	double GP_right;
+	double GI_right;
+	double GD_right;
+	double Gcontr_right;
+	double setpoint_right;
+	double angvel_left;
+	double angvel_right;
+	float contr_time;
+	float contr_freq;
+
+    float FL;
+    float RL;
+    float FR;
+    float RR;
 };
