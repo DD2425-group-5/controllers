@@ -69,10 +69,10 @@ void simple_explorer::followrightwallinit(){
 }
 
 void simple_explorer::followrightwall(){
-	calculatePID();
+	//calculatePID();
     v = marchSpeed;
-    w = PIDcontrol_right;
-	//w = 0.005*(sensor[1]-sensor[3]);
+    //w = PIDcontrol_right;
+	w = 0.005*(sensor[1]-sensor[3]);
 }
 
 void simple_explorer::followleftwallinit(){
@@ -80,10 +80,10 @@ void simple_explorer::followleftwallinit(){
 }
 
 void simple_explorer::followleftwall(){
-    calculatePID();	
+    //calculatePID();	
     v = marchSpeed;
-    w = PIDcontrol_left;
-	//w = -0.005*(sensor[0]-sensor[2]);
+    //w = PIDcontrol_left;
+	w = -0.005*(sensor[0]-sensor[2]);
     ROS_INFO("w = %f", w);
 }
 

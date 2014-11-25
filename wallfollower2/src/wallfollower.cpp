@@ -337,10 +337,10 @@ void wallfollower::state5init(){
 
 /*follow the left wall*/
 void wallfollower::state5(){
-	calculatePID();
-    v = 0;
-    //v = marchSpeed;
-	w = PIDcontrol_left;
+	//calculatePID();
+    v = marchSpeed;
+	//w = PIDcontrol_left;
+    w = 0;
     ROS_INFO("STATE: FOLLOW WALL");
     ROS_INFO("w = %f", w);
 }

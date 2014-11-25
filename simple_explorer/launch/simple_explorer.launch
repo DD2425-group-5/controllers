@@ -1,5 +1,5 @@
 <launch>
-	<!--<rosparam file="$(find simple_explorer)/config/paramswf.yaml" command="load" />-->
+	<rosparam file="$(find simple_explorer)/config/paramswf.yaml" command="load" />
 	<include file = "$(find ir_sensors)/launch/ir_sensors.launch"/>
 	<node name="simple_explorer" pkg="simple_explorer" type="simple_explorer" output="screen" />
 	
