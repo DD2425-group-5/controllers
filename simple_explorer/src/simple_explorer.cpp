@@ -60,7 +60,8 @@ char simple_explorer::action(char state){
 	if(10==tmp){ //no wall on the left but the right then?
 		return FOLLOW_RIGHT_WALL;
 	}
-	return DONOTHING;
+	//return DONOTHING;
+	return GO_FORTH;
 }
 
 void simple_explorer::followrightwallinit(){
@@ -72,7 +73,12 @@ void simple_explorer::followrightwall(){
 	//calculatePID();
     v = marchSpeed;
     //w = PIDcontrol_right;
-	w = 0.005*(sensor[1]-sensor[3]);
+	if(sensor[1]<0.3 && sensor[3]<0.3){
+		w = -15*(sensor[1]-sensor[3]);
+	}
+	else{
+		w=0.0;
+	}
 }
 
 void simple_explorer::followleftwallinit(){
@@ -83,8 +89,14 @@ void simple_explorer::followleftwall(){
     //calculatePID();	
     v = marchSpeed;
     //w = PIDcontrol_left;
-	w = -0.005*(sensor[0]-sensor[2]);
-    ROS_INFO("w = %f", w);
+	if(sensor[1]<0.3 && sensor[3]<0.3){
+		w = 15*(sensor[0]-sensor[2]);
+		ROS_INFO("SENSORS DIFF %f W = %f",sensor[0]-sensor[2],w);
+	}
+	else{
+		w=0.0;
+	}
+    //ROS_INFO("w = %f", w);
 }
 
 void simple_explorer::turnleftinit(){
@@ -133,6 +145,12 @@ void simple_explorer::turnrightend(){
 	}
 }
 
+void simple_explorer::goforth(){
+	v = marchSpeed;
+	w = 0.0;
+	y = 0.0;
+}
+
 void simple_explorer::donothing(){
 	//guess what this does
 	//ROS_INFO("STATE: DO NOTHING");
@@ -144,7 +162,7 @@ void simple_explorer::donothing(){
 /*calculates and returns the current state*/
 char simple_explorer::currentState(){
 	//at what distance in meters the sensor readings count as walls
-	float registrate[] = {0.20,0.20,0.20,0.20,0.15,0.15};
+	float registrate[] = {0.30,0.30,0.30,0.30,0.18,0.18};
 	
 	//format xx(s5)(s4)(s3)(s2)(s1)(s0)
 	char tmp = 0b00000000;
@@ -300,7 +318,7 @@ simple_explorer::simple_explorer(int argc, char *argv[]){
 	v = 0.0;
 	w = 0.0;
 	y = 0.0;
-	marchSpeed = 0.25;
+	marchSpeed = 0.20;
 	stop = 0;
 	started=0;
 	change=0;
@@ -311,6 +329,7 @@ simple_explorer::simple_explorer(int argc, char *argv[]){
 	states[FOLLOW_RIGHT_WALL] = &simple_explorer::followrightwallinit;
 	states[TURN_LEFT] = &simple_explorer::turnleftinit;
 	states[TURN_RIGHT] = &simple_explorer::turnrightinit;
+	states[GO_FORTH] = &simple_explorer::goforth;
 	state = DONOTHING;
 	prevState = DONOTHING;
 	statep = &simple_explorer::donothing;

@@ -11,6 +11,7 @@
 #define FOLLOW_RIGHT_WALL	2
 #define TURN_LEFT			3
 #define TURN_RIGHT			4
+#define GO_FORTH			5
 
 class simple_explorer{
 public:
@@ -61,6 +62,7 @@ private:
 	void turnrightinit();
 	void turnrightstart();
 	void turnrightend();
+	void goforth();
 
     void calculatePID();
 
