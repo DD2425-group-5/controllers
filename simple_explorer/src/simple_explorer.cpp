@@ -81,7 +81,7 @@ void simple_explorer::followrightwall(){
 	}
 	if(sensor[1]<0.3 && sensor[3]<0.3){
 		w = -15*(sensor[1]-sensor[3]);
-		ROS_INFO("SENSORS DIFF %f W = %f",sensor[1]-sensor[3],w);
+		ROS_DEBUG("SENSORS DIFF %f W = %f",sensor[1]-sensor[3],w);
 	}
 	else{
 		w=0.0;
