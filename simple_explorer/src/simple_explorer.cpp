@@ -73,8 +73,15 @@ void simple_explorer::followrightwall(){
 	//calculatePID();
     v = marchSpeed;
     //w = PIDcontrol_right;
+	if(sensor[1]<0){
+		sensor[1]=0.04;
+	}
+	if(sensor[3]<0){
+		sensor[3]=0.04;
+	}
 	if(sensor[1]<0.3 && sensor[3]<0.3){
 		w = -15*(sensor[1]-sensor[3]);
+		ROS_INFO("SENSORS DIFF %f W = %f",sensor[1]-sensor[3],w);
 	}
 	else{
 		w=0.0;
@@ -89,7 +96,13 @@ void simple_explorer::followleftwall(){
     //calculatePID();	
     v = marchSpeed;
     //w = PIDcontrol_left;
-	if(sensor[1]<0.3 && sensor[3]<0.3){
+	if(sensor[0]<0){
+		sensor[0]=0.04;
+	}
+	if(sensor[2]<0){
+		sensor[2]=0.04;
+	}
+	if(sensor[0]<0.3 && sensor[2]<0.3){
 		w = 15*(sensor[0]-sensor[2]);
 		ROS_INFO("SENSORS DIFF %f W = %f",sensor[0]-sensor[2],w);
 	}
