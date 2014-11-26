@@ -9,7 +9,7 @@ void simple_explorer::runNode(){
 		if(started){
 			char tmp = currentState();	
 			char tmpState=action(tmp);	//what action shoul be taken given the sensor data
-			ROS_INFO("STATE = %d TMPSTATE = %d stop = %d", state,tmpState,stop);
+			//ROS_INFO("STATE = %d TMPSTATE = %d stop = %d", state,tmpState,stop);
 			if(tmpState!=state && !stop){		//has the state changed?
 				prevState=state;
 				state=tmpState;
