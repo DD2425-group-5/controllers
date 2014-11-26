@@ -49,6 +49,8 @@
   <run_depend>ras_arduino_msgs</run_depend>
   <build_depend>rosutil</build_depend>
   <run_depend>rosutil</run_depend>
+  <build_depend>hardware_msgs</build_depend>
+  <run_depend>hardware_msgs</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -21,7 +21,7 @@ AlignController::AlignController(int argc, char *argv[]){
     ROSUtil::getParam(n, "/topic_list/controller_topics/motor3/published/bool_topic", info_pub_topic);
     
     std::string ir_sub_topic;
-    ROSUtil::getParam(n, "/topic_list/hardware_topics/ir_sensors/published/ir_distance_topic", ir_sub_topic); 
+    ROSUtil::getParam(n, "/topic_list/hardware_topics/hardware_msgs/published/ir_distance_topic", ir_sub_topic); 
    
 
     chatter_pub = n.advertise<ras_arduino_msgs::PWM>(pwm_pub_topic, 1000);
@@ -59,7 +59,7 @@ AlignController::AlignController(int argc, char *argv[]){
 	}
 }
 
-void AlignController::irSensorCallback(const ir_sensors::IRDists msg){
+void AlignController::irSensorCallback(const hardware_msgs::IRDists msg){
 	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
 	for(int i=0;i<6;i++){
 	    if(tmp[i]>=0.29){

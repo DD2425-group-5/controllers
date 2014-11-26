@@ -2,7 +2,7 @@
 #include "geometry_msgs/Twist.h"
 //#include "ras_arduino_msgs/ADConverter.h"
 #include "std_msgs/Bool.h"
-#include "ir_sensors/IRDists.h"
+#include "hardware_msgs/IRDists.h"
 #include <rosutil/rosutil.hpp>
 #include <math.h>
 #include <sstream>
@@ -44,7 +44,7 @@ private:
 	ros::Publisher pub_turning; //for publishing when turning
 	
 	void runNode();					//main run node
-	void sensorCallback(const ir_sensors::IRDists msg);//for sensors
+	void sensorCallback(const hardware_msgs::IRDists msg);//for sensors
 	void isTurningCallback(const std_msgs::Bool msg);	//while the motorcontroller is turning it pubs true
 	int wait();			//call to wait
 	int wait(int ms);	//set wait time in ms

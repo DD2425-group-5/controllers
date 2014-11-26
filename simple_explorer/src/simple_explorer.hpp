@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-#include "ir_sensors/IRDists.h"
+#include "hardware_msgs/IRDists.h"
 #include <rosutil/rosutil.hpp>
 #include <math.h>
 #include <sstream>
@@ -41,7 +41,7 @@ private:
 	ros::Publisher pub_turning; //for publishing when turning
 	
 	void runNode();										//main run node
-	void sensorCallback(const ir_sensors::IRDists msg);	//for sensors
+	void sensorCallback(const hardware_msgs::IRDists msg);	//for sensors
 	void pubTurn(float degrees);						//publish turn as rostopic
 	
 	int wait();			//call to wait

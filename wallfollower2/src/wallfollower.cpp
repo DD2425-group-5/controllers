@@ -2,7 +2,7 @@
 
 //!!!!! NOTICE!! MAKE wallfollower:: into WallFollower:: for consistency!!!!
 
-void wallfollower::sensorCallback(const ir_sensors::IRDists msg){
+void wallfollower::sensorCallback(const hardware_msgs::IRDists msg){
 	float tmp[] = {msg.s0,msg.s1,msg.s2,msg.s3,msg.s4,msg.s5};
 	for(int i=0;i<6;i++){
 		sensor[i]=tmp[i];
