@@ -117,6 +117,7 @@ void simple_explorer::turnleftinit(){
 	w = 0.0;
 	stop = 1;
 	wait(5);
+	pubTurn(90.0);
 	statep=&simple_explorer::turnleftstart;
 }
 
@@ -132,6 +133,7 @@ void simple_explorer::turnleftend(){
 	if(wait()){
 		y = 0.0;
 		stop = 0;
+		pubTurn(0);
 	}
 }
 
@@ -140,6 +142,7 @@ void simple_explorer::turnrightinit(){
 	w = 0.0;
 	stop = 1;
 	wait(5);
+	pubTurn(-90.0);
 	statep=&simple_explorer::turnrightstart;
 }
 
@@ -155,6 +158,7 @@ void simple_explorer::turnrightend(){
 	if(wait()){
 		y = 0.0;
 		stop = 0;
+		pubTurn(0);
 	}
 }
 
