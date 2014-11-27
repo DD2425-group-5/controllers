@@ -73,18 +73,19 @@ void simple_explorer::followrightwall(){
 	//calculatePID();
     v = marchSpeed;
     //w = PIDcontrol_right;
-	if(sensor[1]<0){
+	/*if(sensor[1]<0){
 		sensor[1]=0.04;
 	}
 	if(sensor[3]<0){
 		sensor[3]=0.04;
-	}
+	}*/
 	if(sensor[1]<0.3 && sensor[3]<0.3){
-		w = -15*(sensor[1]-sensor[3]);
+        w = PIDcontrol_right;
+		//w = -15*(sensor[1]-sensor[3]);
 		//ROS_DEBUG("SENSORS DIFF %f W = %f",sensor[1]-sensor[3],w);
 	}
 	else{
-		w=0.0;
+		w = 0.0;
 	}
 }
 
@@ -93,23 +94,24 @@ void simple_explorer::followleftwallinit(){
 }
 
 void simple_explorer::followleftwall(){
-    //calculatePID();	
+    calculatePID();	
     v = marchSpeed;
     //w = PIDcontrol_left;
-	if(sensor[0]<0){
+	/*if(sensor[0]<0){
 		sensor[0]=0.04;
 	}
 	if(sensor[2]<0){
 		sensor[2]=0.04;
-	}
+	}*/
 	if(sensor[0]<0.3 && sensor[2]<0.3){
-		w = 15*(sensor[0]-sensor[2]);
+		//w = 15*(sensor[0]-sensor[2]);
+        w = PIDcontrol_left;
 		//ROS_INFO("SENSORS DIFF %f W = %f",sensor[0]-sensor[2],w);
 	}
 	else{
-		w=0.0;
+		w = 0.0;
 	}
-    //ROS_INFO("w = %f", w);
+    ROS_INFO("w = %f", w);
 }
 
 void simple_explorer::turnleftinit(){
@@ -250,7 +252,7 @@ void simple_explorer::sensorCallback(const hardware_msgs::IRDists msg){
 }
 
 void simple_explorer::calculatePID(){
-    FL = 0.0;
+    /*FL = 0.0;
     RL = 0.0;
     
     FR = 0.0;
@@ -283,30 +285,52 @@ void simple_explorer::calculatePID(){
     }
     else{ 
         RR = sensor[3];
-    }
+    }*/
     
+    // Left side sensors:
+    if(sensor[0] < 0){
+		sensor[0] = 0.04;
+	}
+	if(sensor[2] < 0){
+		sensor[2] = 0.04;
+	}
+
+    // Right side sensors:
+	if(sensor[1] < 0){
+		sensor[1] = 0.04;
+	}
+	if(sensor[3] < 0){
+		sensor[3] = 0.04;
+	}
     
-	angvel_left = FL - RL;
-	angvel_right = FR - RR;
+	angvel_left = sensor[2] - sensor[0];
+	angvel_right = sensor[3] - sensor[1];
     ROS_INFO("angvel_left = %f", angvel_left);
 	
-	ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
+	/*ROS_INFO("sensor distance: 1: [%f] 2: [%f] 3: [%f] 4: [%f] 5: [%f] 6: [%f] \n\n",\
 	sensor[0],\
 	sensor[1],\
 	sensor[2],\
 	sensor[3],\
 	sensor[4],\
-	sensor[5]);
-	
+	sensor[5]);*/
+
 	// Error between target value and measured value
 	err_left = setpoint_left - angvel_left;
 	err_right = setpoint_right - angvel_right;
+
+    ROS_INFO("err_left = %f", err_left);
+    ROS_INFO("err_left_prev = %f", err_left_prev);
 	
 	// Left sensors controller
 	Pcontrol_left = GP_left*err_left;
 	Icontrol_left = Icontrol_left_prev + contr_time*GI_left*err_left; //+ (Gcontr_left/GP_left)*(
 	Dcontrol_left = (GD_left/contr_time)*(err_left - err_left_prev);
 	PIDcontrol_left = Pcontrol_left + Icontrol_left + Dcontrol_left;
+
+    ROS_INFO("Pcontrol_left = %f", Pcontrol_left);
+    ROS_INFO("Icontrol_left = %f", Icontrol_left);
+    ROS_INFO("Dcontrol_left = %f", Dcontrol_left);
 	
 	// Right sensors controller
 	Pcontrol_right = GP_right*err_right;
