@@ -89,7 +89,7 @@ void AlignController::setpointCallback( geometry_msgs::Twist setpoint)
 		correction_L= 0.0;
 		correction_R= 0.0;
 	  }
-	  
+	  ROS_INFO("wallToAlignTo is %f",  setpoint.angular.x);
 	if (setpoint.angular.x>0){
         wallToAlignTo = Left;
     }
@@ -242,7 +242,7 @@ void AlignController::runNodeAlignTurn(){
             else if (wallToAlignTo == Right){ 
 
 
-                        ROS_INFO("ALINGING TO LEFT WALL...");
+                        ROS_INFO("ALINGING TO RIGHT WALL...");
 			            //controller Left wheel (PWM2), INCL Antiwindup
 			            control_p_L=Gp_L*err_L;
 			            control_i_L=control_i_OLD_L + (control_time*Gi_L)*err_L +(Gc_L/Gp_L)* \
