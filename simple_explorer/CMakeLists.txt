@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   ras_arduino_msgs
   rosutil
+  hardware_msgs
 )
 
 catkin_package(
@@ -15,13 +16,12 @@ catkin_package(
 #  DEPENDS system_lib
 
   DEPENDS orocos_kdl
-  CATKIN_DEPENDS roscpp std_msgs ras_arduino_msgs rosutil
+  CATKIN_DEPENDS roscpp std_msgs ras_arduino_msgs rosutil hardware_msgs
   INCLUDE_DIRS
 )
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(simple_explorer src/simple_explorer.cpp)
 target_link_libraries(simple_explorer ${catkin_LIBRARIES} rosutil)

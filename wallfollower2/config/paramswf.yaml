@@ -1,6 +1,7 @@
 controllerwf: {
 
-GP_left: -16.0, #-0.03
+#wallfollower2
+GP_left: 1.0, #-0.03
 GI_left: -0.0,#-0.004
 GD_left: 0.0,
 Gcontr_left: 0.0,
@@ -11,7 +12,7 @@ GP_right: 0.0,
 GI_right: 0.0,
 GD_right: 0.0,
 Gcontr_right: 0.0,
-setpoint_right: -2.3,
+setpoint_right: 0.0,
 
 contr_time: 0.1,
 contr_freq: 50.0

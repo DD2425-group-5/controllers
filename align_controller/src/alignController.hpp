@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/Int32.h"
 #include "std_msgs/Bool.h"
-#include "ir_sensors/IRDists.h"
+#include "hardware_msgs/IRDists.h"
 #include "ras_arduino_msgs/PWM.h"
 #include "ras_arduino_msgs/Encoders.h"
 #include "geometry_msgs/Twist.h"
@@ -53,7 +53,7 @@ private:
     ros::Subscriber sub_sensor_feedback;
     ros::Subscriber sub_setpoint;
   
-    void irSensorCallback(const ir_sensors::IRDists msg);
+    void irSensorCallback(const hardware_msgs::IRDists msg);
     void setpointCallback( geometry_msgs::Twist setpoint);
     void runNodeAlignTurn();
 };
