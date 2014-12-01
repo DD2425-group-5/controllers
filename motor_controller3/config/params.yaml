@@ -1,5 +1,6 @@
 controller3: {
-  Gp_R: 10.2,
+
+  Gp_R: 10.3,
   Gp_L: 10.0,
   Gi_R: 0.9,
   Gi_L: 0.9,
