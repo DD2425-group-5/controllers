@@ -4,6 +4,7 @@ project(wallfollower)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  ras_arduino_msgs
 )
 
 catkin_package(
