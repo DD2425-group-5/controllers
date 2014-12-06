@@ -10,6 +10,14 @@ void complex_explorer::runNode(){
 			char tmp = currentState();	
 			char tmpState=action(tmp);	//what action shoul be taken given the sensor data
 			//ROS_INFO("STATE = %d TMPSTATE = %d stop = %d", state,tmpState,stop);
+			if(scanState==2){
+				move5++;
+				if(move5>=15){
+					ROS_INFO("FORCE TURN LEFT");
+					scanState = 0;
+					tmpState = TURN_LEFT;
+				}
+			}
 			if(tmpState!=state && !stop){		//has the state changed?
 				prevState=state;
 				state=tmpState;
@@ -18,6 +26,9 @@ void complex_explorer::runNode(){
 				statep = states[state];
 			}
 			(this->*statep)();
+			if(state == FOLLOW_RIGHT_WALL || state == GO_FORTH){
+				scan();
+			}
 		}
 		
 		geometry_msgs::Twist msg;	//for controlling the motor
@@ -54,7 +65,7 @@ char complex_explorer::action(char sensor_state){
 		}
 	}
 	
-	tmp = sensor_state & 0b00000101;
+	/*tmp = sensor_state & 0b00000101;
 	if(state == TURN_LEFT){
 		return SCAN_LEFT;
 	}
@@ -71,7 +82,7 @@ char complex_explorer::action(char sensor_state){
 		//ROS_INFO("END OF LEFT WALL");
 		move5 = 0;
 		return MOVE_FIVE;
-	}
+	}*/
 	
 	tmp = sensor_state & 0b00000101;	//apply lw masking
 	if(5==tmp){ //do we have a wall on the left
@@ -82,9 +93,29 @@ char complex_explorer::action(char sensor_state){
 		return FOLLOW_RIGHT_WALL;
 	}
 	
-	
+	tmp = sensor_state & 0b00110000;
+	if(!tmp){
+		return GO_FORTH;
+	}
+	tmp = sensor_state & 0b00000101;
+	if(0==tmp && prevState != TURN_LEFT){
+		return TURN_LEFT;
+	}
 	//return DONOTHING;
 	return GO_FORTH;
+}
+
+void complex_explorer::scan(){
+	char tmp = currentState();
+	char tmp2 = tmp & 0b00000100;
+	//ROS_INFO("SCAN %d",tmp2);
+	if(tmp2 && scanState == 0){
+		scanState=1;
+	}
+	else if(!tmp2 && scanState == 1){
+		scanState = 2;
+		move5 = 0;
+	}
 }
 
 void complex_explorer::followrightwallinit(){
@@ -104,8 +135,8 @@ void complex_explorer::followrightwall(){
 	}
 	/*char tmp = currentState();
 	char tmp2 = tmp & 0b00000100;
-	if(tmp2 == 5){
-		stop = 0;
+	if(tmp2){
+		statep = &complex_explorer::followrightwall2;
 	}*/
 	if(sensor[1]<0.3 && sensor[3]<0.3){
 		w = -15*(sensor[1]-sensor[3]);
@@ -114,6 +145,10 @@ void complex_explorer::followrightwall(){
 	else{
 		w = 0.0;
 	}
+}
+
+void complex_explorer::followrightwall2(){
+	
 }
 
 void complex_explorer::followleftwallinit(){
@@ -162,6 +197,7 @@ void complex_explorer::turnleftend(){
 		y = 0.0;
 		stop = 0;
 		pubTurn(0);
+		wait(5);
 	}
 }
 
@@ -187,6 +223,7 @@ void complex_explorer::turnrightend(){
 		y = 0.0;
 		stop = 0;
 		pubTurn(0);
+		wait(5);
 	}
 }
 
@@ -224,14 +261,16 @@ void complex_explorer::scanleftend(){
 }
 
 void complex_explorer::goforth(){
-	v = marchSpeed;
-	w = 0.0;
-	y = 0.0;
-	if(sensor[0]<0){
-		w=0.04;
-	}
-	if(sensor[1]<0){
-		w=-0.04;
+	if(wait()){
+		v = marchSpeed;
+		w = 0.0;
+		y = 0.0;
+		/*if(sensor[0]<0){
+			w=0.04;
+		}
+		if(sensor[1]<0){
+			w=-0.04;
+		}*/
 	}
 }
 
@@ -357,10 +396,11 @@ complex_explorer::complex_explorer(int argc, char *argv[]){
 	v = 0.0;
 	w = 0.0;
 	y = 0.0;
-	marchSpeed = 0.25;
+	marchSpeed = 0.3;
 	stop = 0;
 	started=0;
 	change=0;
+	scanState = 0;
 	
 	//init state machine
 	states[DONOTHING] = &complex_explorer::donothing;

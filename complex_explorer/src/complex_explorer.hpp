@@ -38,6 +38,7 @@ private:
 	void (complex_explorer::*states[32])();	// state pointers
 	void (complex_explorer::*statep)();	//state pointer
 	int move5;
+	int scanState;			//scan state for finding left wall again
 	/**/
 	
 	ros::Subscriber sub_sensor;	//sub to get distance values
@@ -62,6 +63,7 @@ private:
 	void followleftwall();
 	void followrightwallinit();
 	void followrightwall();
+	void followrightwall2();
 	
 	void turnleftinit();
 	void turnleftstart();
@@ -74,4 +76,6 @@ private:
 	void scanleftinit();
 	void scanleft1();
 	void scanleftend();
+	
+	void scan();
 };
