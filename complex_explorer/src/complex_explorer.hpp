@@ -15,6 +15,7 @@
 #define GO_FORTH			5
 #define SCAN_LEFT			6
 #define MOVE_FIVE			7
+#define U_TURN				8
 
 class complex_explorer{
 public:

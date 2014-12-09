@@ -13,9 +13,15 @@ void complex_explorer::runNode(){
 			if(scanState==2){
 				move5++;
 				if(move5>=15){
-					ROS_INFO("FORCE TURN LEFT");
-					scanState = 0;
-					tmpState = TURN_LEFT;
+					if(state == TURN_LEFT){
+						ROS_INFO("ALREADY TURNED LEFT");
+						scanState = 0;
+					}
+					else{
+						ROS_INFO("FORCE TURN LEFT");
+						scanState = 0;
+						tmpState = TURN_LEFT;
+					}
 				}
 			}
 			if(tmpState!=state && !stop){		//has the state changed?
@@ -53,6 +59,10 @@ void complex_explorer::runNode(){
 char complex_explorer::action(char sensor_state){
 	//return GO_FORTH;
 	char tmp;
+	tmp = sensor_state & 0b00110011;
+	if(tmp == 51){
+		return U_TURN;
+	}
 	tmp = sensor_state & 0b00110000;	//apply front masking
 	if(tmp>0){ //are there any obstacle in the way
 		//return DONOTHING;
@@ -197,6 +207,7 @@ void complex_explorer::turnleftend(){
 		y = 0.0;
 		stop = 0;
 		pubTurn(0);
+		scanState = 0;
 		wait(5);
 	}
 }
@@ -222,6 +233,7 @@ void complex_explorer::turnrightend(){
 	if(wait()){
 		y = 0.0;
 		stop = 0;
+		//scanState = 0;
 		pubTurn(0);
 		wait(5);
 	}
@@ -360,6 +372,9 @@ void complex_explorer::printState(){
 	if(state==MOVE_FIVE){
 		ROS_INFO("state = MOVE_FIVE");
 	}
+	if(state==U_TURN){
+		ROS_INFO("state = U_TURN");
+	}
 }
 
 void complex_explorer::isTurningCallback(const std_msgs::Bool msg){
@@ -411,6 +426,7 @@ complex_explorer::complex_explorer(int argc, char *argv[]){
 	states[GO_FORTH] = &complex_explorer::goforth;
 	states[SCAN_LEFT] = &complex_explorer::scanleftinit;
 	states[MOVE_FIVE] = &complex_explorer::goforth;
+	states[U_TURN] = &complex_explorer::donothing;
 	state = DONOTHING;
 	prevState = DONOTHING;
 	statep = &complex_explorer::donothing;
