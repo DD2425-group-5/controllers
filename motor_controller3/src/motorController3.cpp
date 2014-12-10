@@ -405,9 +405,9 @@ void MotorController3::runNodeSeek(){
 
 			if (setpoint_wL <0.01){
 
-				control_L_preSat-=32; //used to be 30
+				control_L_preSat-=33; //used to be 32
 			} else {
-				control_L_preSat+=32;
+				control_L_preSat+=33;
 
 			}
 
