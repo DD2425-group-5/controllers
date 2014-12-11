@@ -2,7 +2,8 @@
 
 void complex_explorer::runNode(){
 	ros::Rate loop_rate(hz);	//50 Hz
-	
+	Timer tim;
+	tim.wait(50);
 	while (ros::ok())			//main loop of this code
 	{
 		//ROS_INFO("STATE = %d", state);
@@ -21,15 +22,31 @@ void complex_explorer::runNode(){
 						ROS_INFO("FORCE TURN LEFT");
 						scanState = 0;
 						tmpState = TURN_LEFT;
+						change = 10;
 					}
 				}
 			}
+			if(v==0 && w == 0 && y == 0){
+				if(tim.wait()){
+					ROS_INFO("TIME OUT");
+					prevState=state;
+					state = DONOTHING;
+					change = 10;
+				}
+			}
+			else{
+				tim.wait(50);
+			}
 			if(tmpState!=state && !stop){		//has the state changed?
-				prevState=state;
-				state=tmpState;
-				printState();
-				//ROS_INFO("STATE = %d", state);
-				statep = states[state];
+				change++;
+				if(change >= 10){
+					prevState=state;
+					state=tmpState;
+					printState();
+					//ROS_INFO("STATE = %d", state);
+					statep = states[state];
+					change = 0;
+				}
 			}
 			(this->*statep)();
 			if(state == FOLLOW_RIGHT_WALL || state == GO_FORTH){
@@ -155,6 +172,7 @@ void complex_explorer::followrightwall(){
 	else{
 		w = 0.0;
 	}
+	runTime++;
 }
 
 void complex_explorer::followrightwall2(){
@@ -182,6 +200,7 @@ void complex_explorer::followleftwall(){
 	else{
 		w = 0.0;
 	}
+	runTime++;
 	//ROS_INFO("w = %f", w);
 }
 
@@ -209,6 +228,7 @@ void complex_explorer::turnleftend(){
 		pubTurn(0);
 		scanState = 0;
 		wait(5);
+		runTime = 0;
 	}
 }
 
@@ -233,9 +253,10 @@ void complex_explorer::turnrightend(){
 	if(wait()){
 		y = 0.0;
 		stop = 0;
-		//scanState = 0;
+		scanState = 0;
 		pubTurn(0);
 		wait(5);
+		runTime = 0;
 	}
 }
 
@@ -272,11 +293,56 @@ void complex_explorer::scanleftend(){
 	}
 }
 
+void complex_explorer::uturninit(){
+	v = 0.0;
+	w = 0.0;
+	stop = 1;
+	wait(5);
+	pubTurn(180.0);
+	statep=&complex_explorer::uturn1;
+}
+
+void complex_explorer::uturn1(){
+	if(wait()){
+		y = -90;
+		wait(25);
+		statep=&complex_explorer::uturn2;
+	}
+}
+
+void complex_explorer::uturn2(){
+	if(wait()){
+		y = 0;
+		wait(5);
+		statep=&complex_explorer::uturn3;
+	}
+}
+
+void complex_explorer::uturn3(){
+	if(wait()){
+		y = -90;
+		wait(25);
+		statep=&complex_explorer::uturnend;
+	}
+}
+
+void complex_explorer::uturnend(){
+	if(wait()){
+		y = 0.0;
+		stop = 0;
+		//scanState = 0;
+		pubTurn(0);
+		wait(5);
+		runTime = 0;
+	}
+}
+
 void complex_explorer::goforth(){
 	if(wait()){
 		v = marchSpeed;
 		w = 0.0;
 		y = 0.0;
+		runTime++;
 		/*if(sensor[0]<0){
 			w=0.04;
 		}
@@ -297,8 +363,12 @@ void complex_explorer::donothing(){
 /*calculates and returns the current state*/
 char complex_explorer::currentState(){
 	//at what distance in meters the sensor readings count as walls
-	float registrate[] = {0.3,0.3,0.3,0.3,0.18,0.18};
 	
+	float registrate[] = {0.25,0.25,0.25,0.25,0.21,0.21};
+	if(runTime<100){
+		//registrate[4]=0.17;
+		//registrate[5]=0.17;
+	}
 	//format xx(s5)(s4)(s3)(s2)(s1)(s0)
 	char tmp = 0b00000000;
 	int tmp2 = 1;
@@ -411,11 +481,12 @@ complex_explorer::complex_explorer(int argc, char *argv[]){
 	v = 0.0;
 	w = 0.0;
 	y = 0.0;
-	marchSpeed = 0.3;
+	marchSpeed = 0.25;
 	stop = 0;
 	started=0;
 	change=0;
 	scanState = 0;
+	runTime = 0;
 	
 	//init state machine
 	states[DONOTHING] = &complex_explorer::donothing;
@@ -426,7 +497,8 @@ complex_explorer::complex_explorer(int argc, char *argv[]){
 	states[GO_FORTH] = &complex_explorer::goforth;
 	states[SCAN_LEFT] = &complex_explorer::scanleftinit;
 	states[MOVE_FIVE] = &complex_explorer::goforth;
-	states[U_TURN] = &complex_explorer::donothing;
+	states[U_TURN] = &complex_explorer::uturninit;
+	states[FORCE_TURN_LEFT] = &complex_explorer::turnleftinit;
 	state = DONOTHING;
 	prevState = DONOTHING;
 	statep = &complex_explorer::donothing;

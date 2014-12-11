@@ -16,6 +16,33 @@
 #define SCAN_LEFT			6
 #define MOVE_FIVE			7
 #define U_TURN				8
+#define FORCE_TURN_LEFT		9
+
+class Timer{
+private:
+	int timer;
+public:
+	Timer(){
+		timer = 0;
+	}
+	
+	int wait(int ms){
+		timer=ms*5;
+		return 1;
+	}
+
+	/*returns 1 after wait()*/
+	int wait(){
+		//ROS_INFO("timer = %d", timer);
+		if(timer == 0){
+			return 1;
+		}
+		else{
+			timer--;
+			return 0;
+		}
+	}
+};
 
 class complex_explorer{
 public:
@@ -40,6 +67,8 @@ private:
 	void (complex_explorer::*statep)();	//state pointer
 	int move5;
 	int scanState;			//scan state for finding left wall again
+	int runTime;
+	//int change;				//for observing multiple changes in state
 	/**/
 	
 	ros::Subscriber sub_sensor;	//sub to get distance values
@@ -74,6 +103,12 @@ private:
 	void turnrightstart();
 	void turnrightend();
 	void goforth();
+	
+	void uturninit();
+	void uturn1();
+	void uturn2();
+	void uturn3();
+	void uturnend();
 	void scanleftinit();
 	void scanleft1();
 	void scanleftend();
