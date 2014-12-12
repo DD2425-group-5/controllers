@@ -364,10 +364,10 @@ void complex_explorer::donothing(){
 char complex_explorer::currentState(){
 	//at what distance in meters the sensor readings count as walls
 	
-	float registrate[] = {0.25,0.25,0.25,0.25,0.21,0.21};
-	if(runTime<100){
-		//registrate[4]=0.17;
-		//registrate[5]=0.17;
+	float registrate[] = {0.23,0.23,0.23,0.23,0.215,0.215};
+	if(runTime<150){
+		registrate[4]=0.18;
+		registrate[5]=0.18;
 	}
 	//format xx(s5)(s4)(s3)(s2)(s1)(s0)
 	char tmp = 0b00000000;
